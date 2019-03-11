@@ -29,6 +29,12 @@ target_link_libraries(human ${catkin_LIBRARIES})
 add_executable(integrator src/integrator.cpp)
 target_link_libraries(integrator ${catkin_LIBRARIES} boost_system)
 
+add_executable(controller src/controller.cpp)
+target_link_libraries(controller ${catkin_LIBRARIES})
+
+add_executable(grid_states src/grid_states.cpp)
+target_link_libraries(grid_states ${catkin_LIBRARIES})
+
 add_executable(gazebo_interface src/gazebo_interface.cpp)
 target_link_libraries(gazebo_interface ${catkin_LIBRARIES})
 

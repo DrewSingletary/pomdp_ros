@@ -20,27 +20,16 @@ geometry_msgs::Pose pose;
 geometry_msgs::Twist twist;
 gazebo_msgs::ModelState modelstate;
 
-void states_cb(const std_msgs::Float32MultiArray::ConstPtr& msg) {
+void uav_states_cb(const std_msgs::Float32MultiArray::ConstPtr& msg) {
   for (int i = 0; i < nx; ++i)
     states[i] = msg->data[i];
 
-  double cy = cos(states[2] * 0.5);
-  double sy = sin(states[2] * 0.5);
-  double cp = 0;
-  double sp = 0;
-  double cr = 0;
-  double sr = 0;
-
   pose.position.x = states[0];
   pose.position.y = states[1];
-  pose.position.z = 0;
+  pose.position.z = states[2];
 
-  geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(states[2]);
+  geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(0);
   pose.orientation = odom_quat;
-  // pose.orientation.x = cy * cp * sr - sy * sp * cr;
-  // pose.orientation.y = sy * cp * sr + cy * sp * cr;
-  // pose.orientation.z = sy * cp * cr - cy * sp * sr;
-  // pose.orientation.w = cy * cp * cr + sy * sp * sr;
 
   twist.linear.x = 0.0;
   twist.linear.y = 0.0;
@@ -49,7 +38,57 @@ void states_cb(const std_msgs::Float32MultiArray::ConstPtr& msg) {
   twist.angular.y = 0.0;
   twist.angular.z = 0.0;
 
-  modelstate.model_name = (std::string) "boat";
+  modelstate.model_name = (std::string) "uav";
+  modelstate.reference_frame = (std::string) "world";
+  modelstate.pose = pose;
+  modelstate.twist = twist;
+  gazebo_pub.publish(modelstate);
+}
+
+void segway_states_cb(const std_msgs::Float32MultiArray::ConstPtr& msg) {
+  for (int i = 0; i < nx; ++i)
+    states[i] = msg->data[i];
+
+  pose.position.x = states[0];
+  pose.position.y = states[1];
+  pose.position.z = .2;
+
+  geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(states[3]);
+  pose.orientation = odom_quat;
+
+  twist.linear.x = 0.0;
+  twist.linear.y = 0.0;
+  twist.linear.z = 0.0;
+  twist.angular.x = 0.0;
+  twist.angular.y = 0.0;
+  twist.angular.z = 0.0;
+
+  modelstate.model_name = (std::string) "segway";
+  modelstate.reference_frame = (std::string) "world";
+  modelstate.pose = pose;
+  modelstate.twist = twist;
+  gazebo_pub.publish(modelstate);
+}
+
+void flipper_states_cb(const std_msgs::Float32MultiArray::ConstPtr& msg) {
+  for (int i = 0; i < nx; ++i)
+    states[i] = msg->data[i];
+
+  pose.position.x = states[0];
+  pose.position.y = states[1];
+  pose.position.z = 0;
+
+  geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(states[2]);
+  pose.orientation = odom_quat;
+
+  twist.linear.x = 0.0;
+  twist.linear.y = 0.0;
+  twist.linear.z = 0.0;
+  twist.angular.x = 0.0;
+  twist.angular.y = 0.0;
+  twist.angular.z = 0.0;
+
+  modelstate.model_name = (std::string) "flipper";
   modelstate.reference_frame = (std::string) "world";
   modelstate.pose = pose;
   modelstate.twist = twist;
@@ -62,7 +101,9 @@ int main(int argc, char **argv) {
 
   ros::NodeHandle n;
 
-  ros::Subscriber states_sub = n.subscribe<std_msgs::Float32MultiArray>("states", 1, states_cb);
+  ros::Subscriber uav_states_sub = n.subscribe<std_msgs::Float32MultiArray>("uav/states", 1, uav_states_cb);
+  ros::Subscriber segway_states_sub = n.subscribe<std_msgs::Float32MultiArray>("segway/states", 1, segway_states_cb);
+  // ros::Subscriber flipper_states_sub = n.subscribe<std_msgs::Float32MultiArray>("flipper/states", 1, flipper_states_cb);
 
   gazebo_pub = n.advertise<gazebo_msgs::ModelState>("/gazebo/set_model_state", 1000);
 

@@ -14,11 +14,19 @@ typedef Eigen::VectorXd state_type;
 double t;
 double timeScale = 1;
 
+const int uav_nx = 12;
+const int uav_nu = 3;
+const int segway_nx = 7;
+const int segway_nu = 2;
+const int flipper_nx = 5;
+const int flipper_nu = 2;
+
 class UAVIntegrator {
 public:
   UAVIntegrator() {
     x = Eigen::VectorXd::Zero(nx);
     u = Eigen::VectorXd::Zero(nu);
+    x[2] = 2;
   }
 
   void callback(const std_msgs::Float32MultiArray::ConstPtr& input) {
@@ -28,12 +36,12 @@ public:
   }
 
   void rhs(const state_type &x, state_type &dxdt) {
-    dxdt[0] = x[6];
-    dxdt[1] = x[7];
-    dxdt[2] = x[8];
-    dxdt[3] = x[9];
-    dxdt[4] = x[10];
-    dxdt[5] = x[11];
+    dxdt[0] = u[0];
+    dxdt[1] = u[1];
+    dxdt[2] = u[2];
+    dxdt[3] = 0;
+    dxdt[4] = 0;
+    dxdt[5] = 0;
     dxdt[6] = 0;
     dxdt[7] = 0;
     dxdt[8] = 0;
@@ -44,14 +52,14 @@ public:
 
   void integrate(double dt) {
     t = 0.0;
-    boost::numeric::odeint::integrate(boost::bind(&Integrator::rhs, this, _1, _2), 
+    boost::numeric::odeint::integrate(boost::bind(&UAVIntegrator::rhs, this, _1, _2), 
                                       x, t, t+dt, 0.001);
     t += dt;
   }
   state_type x;
   state_type u;
   const int nx = 12;
-  const int nu = 4;
+  const int nu = 3;
 };
 
 class SegwayIntegrator {
@@ -59,6 +67,8 @@ public:
   SegwayIntegrator() {
     x = Eigen::VectorXd::Zero(nx);
     u = Eigen::VectorXd::Zero(nu);
+    x[0] = 0;
+    x[1] = 0;
   }
 
   void callback(const std_msgs::Float32MultiArray::ConstPtr& input) {
@@ -69,18 +79,18 @@ public:
 
   void rhs(const state_type &x, state_type &dxdt) {
     /* x,y,v,theta,thetadot,psi,psidot  */
-    dxdt[0] = x[2]*cos(x[3]);
-    dxdt[1] = x[2]*sin(x[3]);
-    dxdt[2] = 0;
-    dxdt[3] = x[4];
-    dxdt[4] = 0;
+    dxdt[0] = u[0]*cos(x[3]);
+    dxdt[1] = u[0]*sin(x[3]);
+    dxdt[2] = 0;//u[0];
+    dxdt[3] = u[1];
+    dxdt[4] = 0;//u[1];
     dxdt[5] = x[6];
     dxdt[6] = 0;
   }
 
   void integrate(double dt) {
     t = 0.0;
-    boost::numeric::odeint::integrate(boost::bind(&Integrator::rhs, this, _1, _2), 
+    boost::numeric::odeint::integrate(boost::bind(&SegwayIntegrator::rhs, this, _1, _2), 
                                       x, t, t+dt, 0.001);
     t += dt;
   }
@@ -93,9 +103,11 @@ public:
 
 class FlipperIntegrator {
 public:
-  UAVIntegrator() {
+  FlipperIntegrator() {
     x = Eigen::VectorXd::Zero(nx);
     u = Eigen::VectorXd::Zero(nu);
+    x[0] = 1;
+    x[1] = 1;
   }
 
   void callback(const std_msgs::Float32MultiArray::ConstPtr& input) {
@@ -106,16 +118,16 @@ public:
 
   void rhs(const state_type &x, state_type &dxdt) {
         /* x,y,v,theta,thetadot */
-    dxdt[0] = x[2]*cos(x[3]);
-    dxdt[1] = x[2]*sin(x[3]);
+    dxdt[0] = u[0]*cos(x[3]);
+    dxdt[1] = u[0]*sin(x[3]);
     dxdt[2] = 0;
-    dxdt[3] = x[4];
+    dxdt[3] = u[1];
     dxdt[4] = 0;
   }
 
   void integrate(double dt) {
     t = 0.0;
-    boost::numeric::odeint::integrate(boost::bind(&Integrator::rhs, this, _1, _2), 
+    boost::numeric::odeint::integrate(boost::bind(&FlipperIntegrator::rhs, this, _1, _2), 
                                       x, t, t+dt, 0.001);
     t += dt;
   }
@@ -132,21 +144,48 @@ int main(int argc, char **argv) {
 
   ros::NodeHandle n_;
 
-  Integrator integrator;
+  UAVIntegrator uavintegrator;
+  SegwayIntegrator segwayintegrator;
+  FlipperIntegrator flipperintegrator;
 
   ros::param::get("~_timeScale", timeScale);
 
-  ros::Subscriber sub_ = n_.subscribe("inputs_actual", 1, &Integrator::callback, &integrator);
-  ros::Publisher pub_ = n_.advertise<std_msgs::Float32MultiArray>("states", 1);
-  tf::TransformBroadcaster odom_broadcaster;
+  ros::Subscriber uav_sub_ = n_.subscribe("uav/inputs", 1, &UAVIntegrator::callback, &uavintegrator);
+  ros::Subscriber segway_sub_ = n_.subscribe("segway/inputs", 1, &SegwayIntegrator::callback, &segwayintegrator);
+  ros::Subscriber flipper_sub_ = n_.subscribe("flipper/inputs", 1, &FlipperIntegrator::callback, &flipperintegrator);
+  ros::Publisher uav_pub_ = n_.advertise<std_msgs::Float32MultiArray>("uav/states", 1);
+  ros::Publisher segway_pub_ = n_.advertise<std_msgs::Float32MultiArray>("segway/states", 1);
+  ros::Publisher flipper_pub_ = n_.advertise<std_msgs::Float32MultiArray>("flipper/states", 1);
 
-  std_msgs::Float32MultiArray states_msg;
+  tf::TransformBroadcaster uav_odom_broadcaster;
+  tf::TransformBroadcaster segway_odom_broadcaster;
+  tf::TransformBroadcaster flipper_odom_broadcaster;
 
-  states_msg.data.clear();
-  states_msg.layout.dim.push_back(std_msgs::MultiArrayDimension());
-  states_msg.layout.dim[0].size = nx;
-  for (int i = 0; i < nx; i++) {
-    states_msg.data.push_back(0.0);
+  std_msgs::Float32MultiArray uav_states_msg;
+
+  uav_states_msg.data.clear();
+  uav_states_msg.layout.dim.push_back(std_msgs::MultiArrayDimension());
+  uav_states_msg.layout.dim[0].size = uav_nx;
+  for (int i = 0; i < uav_nx; i++) {
+    uav_states_msg.data.push_back(0.0);
+  }
+
+  std_msgs::Float32MultiArray segway_states_msg;
+
+  segway_states_msg.data.clear();
+  segway_states_msg.layout.dim.push_back(std_msgs::MultiArrayDimension());
+  segway_states_msg.layout.dim[0].size = segway_nx;
+  for (int i = 0; i < segway_nx; i++) {
+    segway_states_msg.data.push_back(0.0);
+  }
+
+  std_msgs::Float32MultiArray flipper_states_msg;
+
+  flipper_states_msg.data.clear();
+  flipper_states_msg.layout.dim.push_back(std_msgs::MultiArrayDimension());
+  flipper_states_msg.layout.dim[0].size = flipper_nx;
+  for (int i = 0; i < flipper_nx; i++) {
+    flipper_states_msg.data.push_back(0.0);
   }
 
   int rate = 200*timeScale;
@@ -156,30 +195,57 @@ int main(int argc, char **argv) {
 
   while (ros::ok()) {
 
-    // integrate
-    integrator.integrate(1./(rate/timeScale));
-
-    // publish
-    for (int i = 0; i < nx; ++i)
+    uavintegrator.integrate(1./(rate/timeScale));
+    for (int i = 0; i < uav_nx; ++i)
     {
-      states_msg.data[i] = integrator.x[i];
+      uav_states_msg.data[i] = uavintegrator.x[i];
     }
-
-    pub_.publish(states_msg);
-    
+    uav_pub_.publish(uav_states_msg);
     ros::Time current_time = ros::Time::now();
-    geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(integrator.x[2]);
-    geometry_msgs::TransformStamped odom_trans;
-    odom_trans.header.stamp = current_time;
-    odom_trans.header.frame_id = "odom";
-    odom_trans.child_frame_id = "base_link";
+    geometry_msgs::Quaternion uav_odom_quat = tf::createQuaternionMsgFromYaw(0);
+    geometry_msgs::TransformStamped uav_odom_trans;
+    uav_odom_trans.header.stamp = current_time;
+    uav_odom_trans.header.frame_id = "world";
+    uav_odom_trans.child_frame_id = "uav/base_link";
+    uav_odom_trans.transform.translation.x = uavintegrator.x[0];
+    uav_odom_trans.transform.translation.y = uavintegrator.x[1];
+    uav_odom_trans.transform.translation.z = uavintegrator.x[2];
+    uav_odom_trans.transform.rotation = uav_odom_quat;
+    uav_odom_broadcaster.sendTransform(uav_odom_trans);
 
-    odom_trans.transform.translation.x = integrator.x[0];
-    odom_trans.transform.translation.y = integrator.x[1];
-    odom_trans.transform.translation.z = 0.0;
-    odom_trans.transform.rotation = odom_quat;
+    segwayintegrator.integrate(1./(rate/timeScale));
+    for (int i = 0; i < uav_nx; ++i)
+    {
+      segway_states_msg.data[i] = segwayintegrator.x[i];
+    }
+    segway_pub_.publish(segway_states_msg);
+    geometry_msgs::Quaternion segway_odom_quat = tf::createQuaternionMsgFromYaw(segwayintegrator.x[3]);
+    geometry_msgs::TransformStamped segway_odom_trans;
+    segway_odom_trans.header.stamp = current_time;
+    segway_odom_trans.header.frame_id = "world";
+    segway_odom_trans.child_frame_id = "segway/base_link";
+    segway_odom_trans.transform.translation.x = segwayintegrator.x[0];
+    segway_odom_trans.transform.translation.y = segwayintegrator.x[1];
+    segway_odom_trans.transform.translation.z = 0;
+    segway_odom_trans.transform.rotation = segway_odom_quat;
+    segway_odom_broadcaster.sendTransform(segway_odom_trans);
 
-    odom_broadcaster.sendTransform(odom_trans);
+    flipperintegrator.integrate(1./(rate/timeScale));
+    for (int i = 0; i < uav_nx; ++i)
+    {
+      flipper_states_msg.data[i] = flipperintegrator.x[i];
+    }
+    flipper_pub_.publish(flipper_states_msg);
+    geometry_msgs::Quaternion flipper_odom_quat = tf::createQuaternionMsgFromYaw(flipperintegrator.x[3]);
+    geometry_msgs::TransformStamped flipper_odom_trans;
+    flipper_odom_trans.header.stamp = current_time;
+    flipper_odom_trans.header.frame_id = "world";
+    flipper_odom_trans.child_frame_id = "flipper/base_link";
+    flipper_odom_trans.transform.translation.x = flipperintegrator.x[0];
+    flipper_odom_trans.transform.translation.y = flipperintegrator.x[1];
+    flipper_odom_trans.transform.translation.z = 0;
+    flipper_odom_trans.transform.rotation = flipper_odom_quat;
+    flipper_odom_broadcaster.sendTransform(flipper_odom_trans);
 
     ros::spinOnce();
     r.sleep();
