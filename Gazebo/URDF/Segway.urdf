@@ -5,7 +5,7 @@
     <static>true</static>
 </gazebo>
 
-  <link name="base_link">
+  <link name="segway/base_link">
     <visual>
       <origin rpy="0.0 0 0" xyz="0 0 0"/>
       <geometry>
@@ -28,7 +28,7 @@
   </link>
 
  <joint name="w1_joint" type="fixed">
-    <parent link="base_link" />
+    <parent link="segway/base_link" />
     <child link="w1_link" />
     <origin xyz="0 .25 0" rpy="0 0 0" />
   </joint>
@@ -56,7 +56,7 @@
   </link>
 
  <joint name="w2_joint" type="fixed">
-    <parent link="base_link" />
+    <parent link="segway/base_link" />
     <child link="w2_link" />
     <origin xyz="0 -.25 0" rpy="0 0 0" />
   </joint>

@@ -44,7 +44,7 @@
   </group>
 
   <!-- start integrator -->
-  <node pkg="pomdp_ros" type="integrator" name="integrator" output="screen">
+  <node pkg="pomdp_ros" type="integrator" name="int" output="screen">
   <param name="_timeScale" value="1" />
   </node>
 

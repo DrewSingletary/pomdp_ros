@@ -2,6 +2,7 @@
 #include "std_msgs/Float32MultiArray.h"
 
 #include <tf/transform_broadcaster.h>
+#include "nav_msgs/OccupancyGrid.h"
 #include <nav_msgs/Odometry.h>
 #include "sensor_msgs/Joy.h"
 #include <boost/numeric/odeint.hpp>
@@ -27,6 +28,13 @@ state_type flipper_states = Eigen::VectorXd::Zero(flipper_nx);
 state_type uav_inputs = Eigen::VectorXd::Zero(uav_nu);
 state_type segway_inputs = Eigen::VectorXd::Zero(segway_nu);
 state_type flipper_inputs = Eigen::VectorXd::Zero(flipper_nu);
+
+nav_msgs::OccupancyGrid uav_loc;
+nav_msgs::OccupancyGrid segway_loc;
+nav_msgs::OccupancyGrid flipper_loc;
+
+nav_msgs::OccupancyGrid grid_sam;
+nav_msgs::OccupancyGrid grid_hab;
 
 void joy_cb(const sensor_msgs::Joy & msg) {
 
@@ -87,14 +95,12 @@ int main(int argc, char **argv) {
   ros::Subscriber segway_states_sub = n.subscribe<std_msgs::Float32MultiArray>("segway/states", 1, segway_states_cb);
   ros::Subscriber flipper_states_sub = n.subscribe<std_msgs::Float32MultiArray>("flipper/states", 1,flipper_states_cb);
 
-  ros::Subscriber uav_des_sub = n.subscribe<std_msgs::Float32MultiArray>("uav/grid_desired", 1, uav_des_cb);
-  ros::Subscriber segway_des_sub = n.subscribe<std_msgs::Float32MultiArray>("segway/grid_desired", 1, segway_des_cb);
-  ros::Subscriber flipper_des_sub = n.subscribe<std_msgs::Float32MultiArray>("flipper/grid_desired", 1,flipper_des_cb);
+  ros::Publisher uav_grid_pub = n.advertise<nav_msgs::OccupancyGrid>("uav/belief", 1);
+  ros::Publisher segway_grid_pub = n.advertise<nav_msgs::OccupancyGrid>("segway/belief", 1);
+  ros::Publisher flipper_grid_pub = n.advertise<nav_msgs::OccupancyGrid>("flipper/belief", 1);
 
-  ros::Publisher uav_controller_pub = n.advertise<std_msgs::Float32MultiArray>("uav/inputs", 1000);
-  ros::Publisher segway_controller_pub = n.advertise<std_msgs::Float32MultiArray>("segway/inputs", 1000);
-  ros::Publisher flipper_controller_pub = n.advertise<std_msgs::Float32MultiArray>("flipper/inputs", 1000);
-
+  ros::Publisher grid_hab_pub = n.advertise<nav_msgs::OccupancyGrid>("grid/habitable", 1);
+  ros::Publisher grid_sam_pub = n.advertise<nav_msgs::OccupancyGrid>("grid/sample", 1);
 
   std_msgs::Float32MultiArray uav_msg;
   uav_msg.data.clear();
