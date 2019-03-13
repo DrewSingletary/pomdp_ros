@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<robot name="flipper">
+
+  <link name="world">
+    <visual>
+      <origin rpy="0.0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://pomdp_ros/Gazebo/Meshes/Flipper/T-90.dae"/>
+      </geometry>
+    </visual>
+  </link>
+   
+
+</robot>

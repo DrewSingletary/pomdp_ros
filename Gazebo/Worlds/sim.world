@@ -221,7 +221,7 @@
           <geometry>
             <mesh>
               <scale>0.01 0.01 0.01</scale>
-              <uri>/home/amberlab/catkin_ws/src/pomdp_ros/Gazebo/Meshes/UAV/Body.stl</uri>
+              <uri>/home/drew/catkin_ws/src/pomdp_ros/Gazebo/Meshes/UAV/Body.stl</uri>
             </mesh>
           </geometry>
         </visual>
@@ -230,7 +230,7 @@
           <geometry>
             <mesh>
               <scale>0.01 0.01 0.01</scale>
-              <uri>/home/amberlab/catkin_ws/src/pomdp_ros/Gazebo/Meshes/UAV/Motor_CW.stl</uri>
+              <uri>/home/drew/catkin_ws/src/pomdp_ros/Gazebo/Meshes/UAV/Motor_CW.stl</uri>
             </mesh>
           </geometry>
         </visual>
@@ -239,7 +239,7 @@
           <geometry>
             <mesh>
               <scale>0.01 0.01 0.01</scale>
-              <uri>/home/amberlab/catkin_ws/src/pomdp_ros/Gazebo/Meshes/UAV/Motor_CW.stl</uri>
+              <uri>/home/drew/catkin_ws/src/pomdp_ros/Gazebo/Meshes/UAV/Motor_CW.stl</uri>
             </mesh>
           </geometry>
         </visual>
@@ -248,7 +248,7 @@
           <geometry>
             <mesh>
               <scale>0.01 0.01 0.01</scale>
-              <uri>/home/amberlab/catkin_ws/src/pomdp_ros/Gazebo/Meshes/UAV/Motor_CCW.stl</uri>
+              <uri>/home/drew/catkin_ws/src/pomdp_ros/Gazebo/Meshes/UAV/Motor_CCW.stl</uri>
             </mesh>
           </geometry>
         </visual>
@@ -257,7 +257,7 @@
           <geometry>
             <mesh>
               <scale>0.01 0.01 0.01</scale>
-              <uri>/home/amberlab/catkin_ws/src/pomdp_ros/Gazebo/Meshes/UAV/Motor_CCW.stl</uri>
+              <uri>/home/drew/catkin_ws/src/pomdp_ros/Gazebo/Meshes/UAV/Motor_CCW.stl</uri>
             </mesh>
           </geometry>
         </visual>
@@ -351,7 +351,7 @@
           <geometry>
             <mesh>
               <scale>0.01 0.01 0.01</scale>
-              <uri>/home/amberlab/catkin_ws/src/pomdp_ros/Gazebo/Meshes/Segway/Body.stl</uri>
+              <uri>/home/drew/catkin_ws/src/pomdp_ros/Gazebo/Meshes/Segway/Body.stl</uri>
             </mesh>
           </geometry>
         </visual>
@@ -360,7 +360,7 @@
           <geometry>
             <mesh>
               <scale>0.01 0.01 0.01</scale>
-              <uri>/home/amberlab/catkin_ws/src/pomdp_ros/Gazebo/Meshes/Segway/WheelL.stl</uri>
+              <uri>/home/drew/catkin_ws/src/pomdp_ros/Gazebo/Meshes/Segway/WheelL.stl</uri>
             </mesh>
           </geometry>
         </visual>
@@ -369,7 +369,7 @@
           <geometry>
             <mesh>
               <scale>0.01 0.01 0.01</scale>
-              <uri>/home/amberlab/catkin_ws/src/pomdp_ros/Gazebo/Meshes/Segway/WheelR.stl</uri>
+              <uri>/home/drew/catkin_ws/src/pomdp_ros/Gazebo/Meshes/Segway/WheelR.stl</uri>
             </mesh>
           </geometry>
         </visual>
@@ -379,6 +379,19 @@
       </link>
       <static>1</static>
       <pose frame=''>0 0 0.2 0 -0 0</pose>
+    </model>
+    <model name="flipper">
+      <pose>0 0 0 1.5707960 0 0</pose>
+      <static>true</static>
+      <link name="flipper/base_link">
+        <visual name="visual">
+          <geometry>
+            <mesh><uri>file://Meshes/Flipper/T-90.dae</uri>
+            <scale>0.2 0.2 0.2</scale>
+            </mesh>
+          </geometry>
+        </visual>
+      </link>
     </model>
   </world>
 </sdf>

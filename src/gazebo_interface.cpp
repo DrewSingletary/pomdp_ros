@@ -78,7 +78,7 @@ void flipper_states_cb(const std_msgs::Float32MultiArray::ConstPtr& msg) {
   pose.position.y = states[1];
   pose.position.z = 0;
 
-  geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(states[2]);
+  geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromRollPitchYaw(1.508,0,states[3]-1.508);
   pose.orientation = odom_quat;
 
   twist.linear.x = 0.0;
@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
 
   ros::Subscriber uav_states_sub = n.subscribe<std_msgs::Float32MultiArray>("uav/states", 1, uav_states_cb);
   ros::Subscriber segway_states_sub = n.subscribe<std_msgs::Float32MultiArray>("segway/states", 1, segway_states_cb);
-  // ros::Subscriber flipper_states_sub = n.subscribe<std_msgs::Float32MultiArray>("flipper/states", 1, flipper_states_cb);
+  ros::Subscriber flipper_states_sub = n.subscribe<std_msgs::Float32MultiArray>("flipper/states", 1, flipper_states_cb);
 
   gazebo_pub = n.advertise<gazebo_msgs::ModelState>("/gazebo/set_model_state", 1000);
 

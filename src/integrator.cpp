@@ -106,8 +106,8 @@ public:
   FlipperIntegrator() {
     x = Eigen::VectorXd::Zero(nx);
     u = Eigen::VectorXd::Zero(nu);
-    x[0] = 1;
-    x[1] = 1;
+    x[0] = 2;
+    x[1] = 2;
   }
 
   void callback(const std_msgs::Float32MultiArray::ConstPtr& input) {

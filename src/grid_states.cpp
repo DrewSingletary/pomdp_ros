@@ -130,23 +130,23 @@ int main(int argc, char **argv) {
 
   while (ros::ok()) {
     
-    uav_controller();
-    for (int i = 0;i<uav_nu;i++) {
-      uav_msg.data[i] = uav_inputs[i];
-    }
-    uav_controller_pub.publish(uav_msg);
+    // uav_controller();
+    // for (int i = 0;i<uav_nu;i++) {
+    //   uav_msg.data[i] = uav_inputs[i];
+    // }
+    // uav_grid_pub.publish(uav_msg);
 
-    segway_controller();
-    for (int i = 0;i<segway_nu;i++) {
-      segway_msg.data[i] = segway_inputs[i];
-    }
-    segway_controller_pub.publish(segway_msg);
+    // segway_controller();
+    // for (int i = 0;i<segway_nu;i++) {
+    //   segway_msg.data[i] = segway_inputs[i];
+    // }
+    // segway_grid_pub.publish(segway_msg);
 
-    flipper_controller();
-    for (int i = 0;i<flipper_nu;i++) {
-      flipper_msg.data[i] = flipper_inputs[i];
-    }
-    flipper_controller_pub.publish(flipper_msg);
+    // flipper_controller();
+    // for (int i = 0;i<flipper_nu;i++) {
+    //   flipper_msg.data[i] = flipper_inputs[i];
+    // }
+    // flipper_grid_pub.publish(flipper_msg);
 
 
 
