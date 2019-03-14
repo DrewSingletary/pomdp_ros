@@ -5,7 +5,7 @@
     <static>true</static>
 </gazebo>
 
-  <link name="base_link">
+  <link name="uav/base_link">
     <visual>
       <origin rpy="0.0 0 0" xyz="0 0 0"/>
       <geometry>
@@ -28,7 +28,7 @@
   </link>
 
  <joint name="m1_joint" type="fixed">
-    <parent link="base_link" />
+    <parent link="uav/base_link" />
     <child link="m1_link" />
     <origin xyz=".17 .17 0" rpy="0 0 0" />
   </joint>
@@ -56,7 +56,7 @@
   </link>
 
  <joint name="m2_joint" type="fixed">
-    <parent link="base_link" />
+    <parent link="uav/base_link" />
     <child link="m2_link" />
     <origin xyz="-.17 -.17 0" rpy="0 0 0" />
   </joint>
@@ -84,7 +84,7 @@
   </link>
 
  <joint name="m3_joint" type="fixed">
-    <parent link="base_link" />
+    <parent link="uav/base_link" />
     <child link="m3_link" />
     <origin xyz=".17 -.17 0" rpy="0 0 0" />
   </joint>
@@ -112,7 +112,7 @@
   </link>
 
  <joint name="m4_joint" type="fixed">
-    <parent link="base_link" />
+    <parent link="uav/base_link" />
     <child link="m4_link" />
     <origin xyz="-.17 .17 0" rpy="0 0 0" />
   </joint>

@@ -1,6 +1,7 @@
 #include "ros/ros.h"
 #include "std_msgs/Float32MultiArray.h"
 #include "std_msgs/Int32.h"
+#include "std_msgs/Bool.h" 
 
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
@@ -13,11 +14,11 @@
 typedef Eigen::VectorXd state_type;
 
 double timeScale = 1;
-double resolution = .5;
+double resolution = 1;
 
-double vmax_flipper = 1;
-double vmax_segway = 2;
-double vmax_uav = 2;
+double vmax_flipper = .5;
+double vmax_segway = 1;
+double vmax_uav = 1;
 
 double amax_flipper = 1;
 double amax_segway = 2;
@@ -45,6 +46,10 @@ state_type flipper_des_pos = Eigen::VectorXd::Zero(2);
 double uav_des_ang = 0.0;
 double segway_des_ang = 0.0;
 double flipper_des_ang = 0.0;
+
+ros::Publisher uav_complete_pub;
+ros::Publisher segway_complete_pub;
+ros::Publisher flipper_complete_pub;
 
 state_type uav_diff = Eigen::VectorXd::Zero(2);
 state_type segway_diff = Eigen::VectorXd::Zero(2);
@@ -95,7 +100,7 @@ void flipper_states_cb(const std_msgs::Float32MultiArray::ConstPtr& msg) {
     flipper_states[i] = msg->data[i];
   if (!flipper_state_received) {
     flipper_des_pos = flipper_states;
-    segway_des_ang = flipper_states[3];
+    flipper_des_ang = flipper_states[3];
     flipper_state_received = true;
   }
 }
@@ -231,16 +236,29 @@ void flipper_act_cb(const std_msgs::Int32::ConstPtr& msg) {
 }
 
 void uav_controller(void) {
+  std_msgs::Bool comp_msg;
+  comp_msg.data = false;
   uav_diff = uav_des_pos-uav_states;
+  double d = sqrt(uav_diff[0]*uav_diff[0]+uav_diff[1]*uav_diff[1]);
   uav_inputs[0] = max(min(5*uav_diff[0],vmax_uav),-vmax_uav);
   uav_inputs[1] = max(min(5*uav_diff[1],vmax_uav),-vmax_uav);
   uav_inputs[2] = 0;
+  if (d < .01) {
+    comp_msg.data = true;
+    uav_inputs[0] = 0;
+    uav_inputs[1] = 0;
+    uav_inputs[2] = 0;
+    uav_complete_pub.publish(comp_msg);
+    return;
+  }
+uav_complete_pub.publish(comp_msg);
 }
 
 void segway_controller(void) {
+  std_msgs::Bool comp_msg;
+  comp_msg.data = false;
   segway_diff = segway_des_pos-segway_states;
   double d = sqrt(segway_diff[0]*segway_diff[0]+segway_diff[1]*segway_diff[1]);
-  ROS_INFO("%f %f %f",segway_diff[0], segway_diff[1], d);
   double dtheta = segway_des_ang-segway_states[3];
   if (abs(dtheta) > M_PI/100) {
     segway_inputs[0] = 0;
@@ -249,19 +267,24 @@ void segway_controller(void) {
   else {
     int ind;
     if (d < .01) {
+      comp_msg.data = true;
       segway_inputs[0] = 0;
+      segway_inputs[1] = 0;
+      segway_complete_pub.publish(comp_msg);
+      return;
     } else {
       segway_inputs[0] = min(10*d,vmax_segway);
+      segway_inputs[1] = max(min(10*(dtheta),amax_segway),-amax_segway);
     }
-    segway_inputs[1] = max(min(10*(dtheta),amax_segway),-amax_segway);
   }
+  segway_complete_pub.publish(comp_msg);
 }
 
 void flipper_controller(void) {
-
+  std_msgs::Bool comp_msg;
+  comp_msg.data = false;
   flipper_diff = flipper_des_pos-flipper_states;
   double d = sqrt(flipper_diff[0]*flipper_diff[0]+flipper_diff[1]*flipper_diff[1]);
-  ROS_INFO("%f %f %f",flipper_diff[0], flipper_diff[1], d);
   double dtheta = flipper_des_ang-flipper_states[3];
   if (abs(dtheta) > M_PI/100) {
     flipper_inputs[0] = 0;
@@ -270,12 +293,17 @@ void flipper_controller(void) {
   else {
     int ind;
     if (d < .01) {
+      comp_msg.data = true;
       flipper_inputs[0] = 0;
+      flipper_inputs[1] = 0;
+      flipper_complete_pub.publish(comp_msg);
+      return;
     } else {
       flipper_inputs[0] = min(5*d,vmax_flipper);
+      flipper_inputs[1] = max(min(5*(dtheta),amax_flipper),-amax_flipper);
     }
-    flipper_inputs[1] = max(min(5*(dtheta),amax_flipper),-amax_flipper);
   }
+  flipper_complete_pub.publish(comp_msg);
 }
 
 
@@ -300,6 +328,10 @@ int main(int argc, char **argv) {
   ros::Publisher uav_controller_pub = n.advertise<std_msgs::Float32MultiArray>("uav/inputs", 1000);
   ros::Publisher segway_controller_pub = n.advertise<std_msgs::Float32MultiArray>("segway/inputs", 1000);
   ros::Publisher flipper_controller_pub = n.advertise<std_msgs::Float32MultiArray>("flipper/inputs", 1000);
+
+  uav_complete_pub = n.advertise<std_msgs::Bool>("uav/complete", 1000);
+  segway_complete_pub = n.advertise<std_msgs::Bool>("segway/complete", 1000);
+  flipper_complete_pub = n.advertise<std_msgs::Bool>("flipper/complete", 1000);
 
 
   std_msgs::Float32MultiArray uav_msg;

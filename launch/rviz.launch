@@ -2,18 +2,26 @@
 
   <arg name="uav_model" default="$(find pomdp_ros)/Gazebo/URDF/UAV.urdf"/>
   <arg name="segway_model" default="$(find pomdp_ros)/Gazebo/URDF/Segway.urdf"/>
+  <arg name="flipper_model" default="$(find pomdp_ros)/Gazebo/URDF/Flipper.urdf"/>
   <arg name="cast_model" default="$(find pomdp_ros)/Gazebo/URDF/cast.urdf"/>
   <arg name="gui" default="true" />
   <arg name="rvizconfig" default="$(find pomdp_ros)/rviz/config.rviz" />
 
   <param name="uav_description" command="$(find xacro)/xacro --inorder $(arg uav_model)" />
+  <param name="flipper_description" command="$(find xacro)/xacro --inorder $(arg flipper_model)" />
   <param name="segway_description" command="$(find xacro)/xacro --inorder $(arg segway_model)" />
   <param name="cast_description" command="$(find xacro)/xacro --inorder $(arg cast_model)" />
   <param name="use_gui" value="$(arg gui)"/>
 
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="uav_st_pub" >
+      <remap from="robot_description" to="uav_description" />
+  </node>
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="segway_st_pub" >
       <remap from="robot_description" to="segway_description" />
-    </node>
+  </node>
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="flipper_st_pub" >
+      <remap from="robot_description" to="flipper_description" />
+  </node>
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
 

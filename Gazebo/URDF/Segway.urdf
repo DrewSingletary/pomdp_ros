@@ -7,9 +7,9 @@
 
   <link name="segway/base_link">
     <visual>
-      <origin rpy="0.0 0 0" xyz="0 0 0"/>
+      <origin rpy="0.0 0 0" xyz="0 0 0.2"/>
       <geometry>
-	<mesh filename="package://pomdp_ros/Gazebo/Meshes/Segway/Body.stl" scale="0.01 0.01 0.01"/>
+	      <mesh filename="package://pomdp_ros/Gazebo/Meshes/Segway/Body.stl" scale="0.01 0.01 0.01"/>
       </geometry>
     </visual>
     <inertial>
@@ -41,7 +41,7 @@
     </inertial>
 
     <visual>
-      <origin xyz="0 0 0"/>
+      <origin xyz="0 0 0.2"/>
       <geometry>
         <mesh filename="package://pomdp_ros/Gazebo/Meshes/Segway/WheelL.stl" scale="0.01 0.01 0.01"/>
       </geometry>
@@ -69,7 +69,7 @@
     </inertial>
 
     <visual>
-      <origin xyz="0 0 0"/>
+      <origin xyz="0 0 0.2"/>
       <geometry>
         <mesh filename="package://pomdp_ros/Gazebo/Meshes/Segway/WheelR.stl" scale="0.01 0.01 0.01"/>
       </geometry>

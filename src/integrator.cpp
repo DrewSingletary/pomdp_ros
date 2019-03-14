@@ -26,6 +26,8 @@ public:
   UAVIntegrator() {
     x = Eigen::VectorXd::Zero(nx);
     u = Eigen::VectorXd::Zero(nu);
+    x[0] = 3.5;
+    x[1] = -9.5;
     x[2] = 2;
   }
 
@@ -67,8 +69,9 @@ public:
   SegwayIntegrator() {
     x = Eigen::VectorXd::Zero(nx);
     u = Eigen::VectorXd::Zero(nu);
-    x[0] = 0;
-    x[1] = 0;
+    x[0] = 3.5;
+    x[1] = -9.5;
+    x[3] = M_PI/2;
   }
 
   void callback(const std_msgs::Float32MultiArray::ConstPtr& input) {
@@ -106,8 +109,9 @@ public:
   FlipperIntegrator() {
     x = Eigen::VectorXd::Zero(nx);
     u = Eigen::VectorXd::Zero(nu);
-    x[0] = 2;
-    x[1] = 2;
+    x[0] = 2.5;
+    x[1] = -9.5;
+    x[3] = M_PI/2;
   }
 
   void callback(const std_msgs::Float32MultiArray::ConstPtr& input) {

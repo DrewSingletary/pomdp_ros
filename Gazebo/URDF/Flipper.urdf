@@ -1,14 +1,24 @@
 <?xml version="1.0"?>
 <robot name="flipper">
 
-  <link name="world">
+  <link name="flipper/base_link">
     <visual>
-      <origin rpy="0.0 0 0" xyz="0 0 0"/>
+      <origin rpy="1.5707960 0 -1.5707960" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://pomdp_ros/Gazebo/Meshes/Flipper/T-90.dae"/>
+        <mesh filename="package://pomdp_ros/Gazebo/Meshes/Flipper/T-90.stl" scale="0.002 0.002 0.002"/>
       </geometry>
     </visual>
+    <inertial>
+       <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+       <mass value="0.001" />
+       <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001" />
+    </inertial>
+    <collision>
+      <origin xyz="0 0 0"/>
+      <geometry>
+        <box size="0.4 0.4 0.4" />
+      </geometry>
+    </collision>
   </link>
    
-
 </robot>
