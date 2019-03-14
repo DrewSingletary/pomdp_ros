@@ -69,7 +69,6 @@ void uav_complete_cb(const std_msgs::Bool::ConstPtr& msg) {
     uav_action_finished = false;
   }
   if (uav_action_finished == false && msg->data == true) {
-    ROS_INFO("updating beliefs for uav");
     ros::Time begin = ros::Time::now();
     uav_loc.header.stamp = begin;
     uav_loc.header.frame_id = "world";
@@ -95,47 +94,38 @@ void uav_complete_cb(const std_msgs::Bool::ConstPtr& msg) {
     if ((int) gridsX-1 > -1) {
        uav_loc.data[(gridsX-1)+gridsY*uav_loc.info.width] = 2;
        count++;
-       ROS_INFO("1");
     }
     if ((int) gridsX-1 > -1 && (int) gridsY-1 > -1) {
        uav_loc.data[(gridsX-1)+(gridsY-1)*uav_loc.info.width] = 2;
        count++;
-       ROS_INFO("2");
     }
     if ((int) gridsY-1 > -1) {
        uav_loc.data[(gridsX)+(gridsY-1)*uav_loc.info.width] = 2;
        count++;
-       ROS_INFO("3");
     }
     if (gridsY+1 < height) {
        uav_loc.data[(gridsX)+(gridsY+1)*uav_loc.info.width] = 2;
        count++;
-       ROS_INFO("4");
     }
     if (gridsY+1 < height && gridsX+1 < width) {
        uav_loc.data[(gridsX+1)+(gridsY+1)*uav_loc.info.width] = 2;
        count++;
-       ROS_INFO("5");
     }
     if (gridsX+1 < width) {
        uav_loc.data[(gridsX+1)+(gridsY)*uav_loc.info.width] = 2;
        count++;
-       ROS_INFO("6");
     }
     if (gridsY+1 < height && (int) gridsX-1 > -1) {
        uav_loc.data[(gridsX-1)+(gridsY+1)*uav_loc.info.width] = 2;
        count++;
-       ROS_INFO("7");
     }
     if ((int) gridsY-1 > -1 && gridsX+1 < width) {
        uav_loc.data[(gridsX+1)+(gridsY-1)*uav_loc.info.width] = 2;
        count++;
-       ROS_INFO("8");
     }
 
     uav_loc.data[gridsX+gridsY*uav_loc.info.width] = 100-2*count;
     uav_grid_pub.publish(uav_loc);
-
     uav_action_finished = true;
   }
 }
@@ -145,7 +135,63 @@ void segway_complete_cb(const std_msgs::Bool::ConstPtr& msg) {
     segway_action_finished = false;
   }
   if (segway_action_finished == false && msg->data == true) {
-    ROS_INFO("updating beliefs for segway");
+    ros::Time begin = ros::Time::now();
+    segway_loc.header.stamp = begin;
+    segway_loc.header.frame_id = "world";
+
+    segway_loc.info.resolution = resolution;
+    segway_loc.info.width = (uint32_t) 9/resolution;
+    segway_loc.info.height = (uint32_t) 15/resolution;
+    uint32_t width = segway_loc.info.width;
+    uint32_t height = segway_loc.info.height;
+    segway_loc.info.origin.position.x = -5;
+    segway_loc.info.origin.position.y = -10;
+    segway_loc.info.origin.position.z = .1;
+
+    segway_loc.data.resize(segway_loc.info.width*segway_loc.info.height,-1);
+    int8_t data[segway_loc.info.width*segway_loc.info.height] = {0};
+    uint32_t gridsX = (segway_states[0]-segway_loc.info.origin.position.x)/resolution;
+    uint32_t gridsY = (segway_states[1]-segway_loc.info.origin.position.y)/resolution;
+    for (int i = 0; i < segway_loc.info.width*segway_loc.info.height; i++) {
+      segway_loc.data[i] = 0;
+    }
+    uint32_t count = 0;
+    ROS_INFO("%i %i %i %i", gridsX, gridsY, width, height);
+    if ((int) gridsX-1 > -1) {
+       segway_loc.data[(gridsX-1)+gridsY*segway_loc.info.width] = 2;
+       count++;
+    }
+    if ((int) gridsX-1 > -1 && (int) gridsY-1 > -1) {
+       segway_loc.data[(gridsX-1)+(gridsY-1)*segway_loc.info.width] = 2;
+       count++;
+    }
+    if ((int) gridsY-1 > -1) {
+       segway_loc.data[(gridsX)+(gridsY-1)*segway_loc.info.width] = 2;
+       count++;
+    }
+    if (gridsY+1 < height) {
+       segway_loc.data[(gridsX)+(gridsY+1)*segway_loc.info.width] = 2;
+       count++;
+    }
+    if (gridsY+1 < height && gridsX+1 < width) {
+       segway_loc.data[(gridsX+1)+(gridsY+1)*segway_loc.info.width] = 2;
+       count++;
+    }
+    if (gridsX+1 < width) {
+       segway_loc.data[(gridsX+1)+(gridsY)*segway_loc.info.width] = 2;
+       count++;
+    }
+    if (gridsY+1 < height && (int) gridsX-1 > -1) {
+       segway_loc.data[(gridsX-1)+(gridsY+1)*segway_loc.info.width] = 2;
+       count++;
+    }
+    if ((int) gridsY-1 > -1 && gridsX+1 < width) {
+       segway_loc.data[(gridsX+1)+(gridsY-1)*segway_loc.info.width] = 2;
+       count++;
+    }
+
+    segway_loc.data[gridsX+gridsY*segway_loc.info.width] = 100-2*count;
+    segway_grid_pub.publish(segway_loc);
     segway_action_finished = true;
   }
 }
@@ -155,7 +201,63 @@ void flipper_complete_cb(const std_msgs::Bool::ConstPtr& msg) {
     flipper_action_finished = false;
   }
   if (flipper_action_finished == false && msg->data == true) {
-    ROS_INFO("updating beliefs for flipper");
+    ros::Time begin = ros::Time::now();
+    flipper_loc.header.stamp = begin;
+    flipper_loc.header.frame_id = "world";
+
+    flipper_loc.info.resolution = resolution;
+    flipper_loc.info.width = (uint32_t) 9/resolution;
+    flipper_loc.info.height = (uint32_t) 15/resolution;
+    uint32_t width = flipper_loc.info.width;
+    uint32_t height = flipper_loc.info.height;
+    flipper_loc.info.origin.position.x = -5;
+    flipper_loc.info.origin.position.y = -10;
+    flipper_loc.info.origin.position.z = .1;
+
+    flipper_loc.data.resize(flipper_loc.info.width*flipper_loc.info.height,-1);
+    int8_t data[flipper_loc.info.width*flipper_loc.info.height] = {0};
+    uint32_t gridsX = (flipper_states[0]-flipper_loc.info.origin.position.x)/resolution;
+    uint32_t gridsY = (flipper_states[1]-flipper_loc.info.origin.position.y)/resolution;
+    for (int i = 0; i < flipper_loc.info.width*flipper_loc.info.height; i++) {
+      flipper_loc.data[i] = 0;
+    }
+    uint32_t count = 0;
+    ROS_INFO("%i %i %i %i", gridsX, gridsY, width, height);
+    if ((int) gridsX-1 > -1) {
+       flipper_loc.data[(gridsX-1)+gridsY*flipper_loc.info.width] = 2;
+       count++;
+    }
+    if ((int) gridsX-1 > -1 && (int) gridsY-1 > -1) {
+       flipper_loc.data[(gridsX-1)+(gridsY-1)*flipper_loc.info.width] = 2;
+       count++;
+    }
+    if ((int) gridsY-1 > -1) {
+       flipper_loc.data[(gridsX)+(gridsY-1)*flipper_loc.info.width] = 2;
+       count++;
+    }
+    if (gridsY+1 < height) {
+       flipper_loc.data[(gridsX)+(gridsY+1)*flipper_loc.info.width] = 2;
+       count++;
+    }
+    if (gridsY+1 < height && gridsX+1 < width) {
+       flipper_loc.data[(gridsX+1)+(gridsY+1)*flipper_loc.info.width] = 2;
+       count++;
+    }
+    if (gridsX+1 < width) {
+       flipper_loc.data[(gridsX+1)+(gridsY)*flipper_loc.info.width] = 2;
+       count++;
+    }
+    if (gridsY+1 < height && (int) gridsX-1 > -1) {
+       flipper_loc.data[(gridsX-1)+(gridsY+1)*flipper_loc.info.width] = 2;
+       count++;
+    }
+    if ((int) gridsY-1 > -1 && gridsX+1 < width) {
+       flipper_loc.data[(gridsX+1)+(gridsY-1)*flipper_loc.info.width] = 2;
+       count++;
+    }
+
+    flipper_loc.data[gridsX+gridsY*flipper_loc.info.width] = 100-2*count;
+    flipper_grid_pub.publish(flipper_loc);
     flipper_action_finished = true;
   }
 }
