@@ -27,9 +27,22 @@ const int flipper_nu = 2;
 const int castWidth = 9;
 const int castHeight = 15;
 
+// double obstacle_resolution = 3;
+
 int width = (int) castWidth/resolution; 
 int height = (int) castHeight/resolution;
+
+// int obsWidth = (int) castWidth/obstacle_resolution; 
+// int obsHeight = (int) castHeight/obstacle_resolution;
 int totalGrids = width*height;
+
+state_type obs_belief = Eigen::VectorXd::Ones(width*height);
+state_type obs_belief_new = Eigen::VectorXd::Ones(width*height);
+state_type true_obs_belief = Eigen::VectorXd::Zero(width*height);
+
+state_type sam_belief = Eigen::VectorXd::Ones(width*height);
+state_type sam_belief_new = Eigen::VectorXd::Ones(width*height);
+state_type true_sam_belief = Eigen::VectorXd::Zero(width*height);
 
 state_type uav_belief = Eigen::VectorXd::Zero(width*height);
 state_type segway_belief = Eigen::VectorXd::Zero(width*height);
@@ -72,6 +85,59 @@ ros::Publisher flipper_grid_pub;
 ros::Publisher grid_hab_pub;
 ros::Publisher grid_sam_pub;
 
+void uav_reward(void) {
+  double uav_r[totalGrids];
+  double gridposx[totalGrids];
+  double gridposy[totalGrids];
+  for (int i = 0; i < totalGrids; i++) {
+    uav_r[i] = -(sam_belief[i]-.5)*(sam_belief[i]-.5)+.25;
+    int iGridX = i % width;
+    int iGridY = (int) i/width;
+    gridposx[i] = uav_loc.info.origin.position.x+iGridX*resolution;
+    gridposy[i] = uav_loc.info.origin.position.y+iGridY*resolution;
+  }
+}
+
+void flipper_reward(void) {
+  double flipper_r[totalGrids];
+  for (int i = 0; i < totalGrids; i++) {
+    flipper_r[i] = -(sam_belief[i]-.5)*(sam_belief[i]-.5)+.25;
+  }
+}
+
+void segway_reward(void) {
+
+}
+
+void grid_hab_update(void) {
+  for (int i = 0; i < totalGrids; i++) {
+    obs_belief_new[i] = flipper_belief[i]*true_obs_belief[i];
+    obs_belief_new[i] += (1-flipper_belief[i])*obs_belief[i];
+  }
+  for (int i = 0; i < grid_hab.info.width*grid_hab.info.height; i++) {
+    int data = 100*obs_belief_new[i];
+    grid_hab.data[i] = data;
+    obs_belief[i] =  obs_belief_new[i];
+  }
+  ros::Time begin = ros::Time::now();
+  grid_hab.header.stamp = begin;
+  grid_hab_pub.publish(grid_hab);
+}
+
+void grid_sam_update(void) {
+  for (int i = 0; i < totalGrids; i++) {
+    sam_belief_new[i] = uav_belief[i]*true_sam_belief[i];
+    sam_belief_new[i] += (1-uav_belief[i])*sam_belief[i];
+  }
+  for (int i = 0; i < grid_sam.info.width*grid_sam.info.height; i++) {
+    int data = 100*obs_belief_new[i];
+    grid_sam.data[i] = data;
+    sam_belief[i] =  sam_belief_new[i];
+  }
+  ros::Time begin = ros::Time::now();
+  grid_sam.header.stamp = begin;
+  grid_sam_pub.publish(grid_sam);
+}
 
 void joy_cb(const sensor_msgs::Joy & msg) {
 
@@ -212,6 +278,8 @@ void uav_complete_cb(const std_msgs::Bool::ConstPtr& msg) {
       }
       uav_grid_pub.publish(uav_loc);
       uav_action_finished = true;
+      grid_hab_update();
+      grid_sam_update();
       ROS_INFO("sum: %f",uav_belief.sum());
     }
   }
@@ -383,6 +451,31 @@ int main(int argc, char **argv) {
   segway_loc.info.origin.position.y = -10;
   segway_loc.info.origin.position.z = .1;
   segway_loc.data.resize(segway_loc.info.width*segway_loc.info.height,-1);
+
+  grid_hab.header.frame_id = "world";
+  grid_hab.info.resolution = resolution;
+  grid_hab.info.width = (uint32_t) castWidth/resolution;
+  grid_hab.info.height = (uint32_t) castHeight/resolution;
+  grid_hab.info.origin.position.x = -5;
+  grid_hab.info.origin.position.y = -10;
+  grid_hab.info.origin.position.z = .1;
+  grid_hab.data.resize(grid_hab.info.width*grid_hab.info.height,-1);
+
+  grid_sam.header.frame_id = "world";
+  grid_sam.info.resolution = resolution;
+  grid_sam.info.width = (uint32_t) castWidth/resolution;
+  grid_sam.info.height = (uint32_t) castHeight/resolution;
+  grid_sam.info.origin.position.x = -5;
+  grid_sam.info.origin.position.y = -10;
+  grid_sam.info.origin.position.z = .1;
+  grid_sam.data.resize(grid_sam.info.width*grid_sam.info.height,-1);
+
+  // Define grids with obstacles
+  true_obs_belief(9*3+4) = 1;
+  true_obs_belief(9*5+3) = 1;
+  true_sam_belief(9*8+0) = 1;
+  obs_belief = obs_belief*.5;
+  sam_belief = sam_belief*.5;
 
   while (ros::ok()) {
     ros::spinOnce();
