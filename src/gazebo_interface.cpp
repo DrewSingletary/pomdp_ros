@@ -76,9 +76,9 @@ void flipper_states_cb(const std_msgs::Float32MultiArray::ConstPtr& msg) {
 
   pose.position.x = states[0];
   pose.position.y = states[1];
-  pose.position.z = 0;
+  pose.position.z = .15;
 
-  geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromRollPitchYaw(1.5708,0,states[3]-1.5708);
+  geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromRollPitchYaw(1.5708,0,states[3]);
   pose.orientation = odom_quat;
 
   twist.linear.x = 0.0;

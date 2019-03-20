@@ -110,9 +110,18 @@ void segway_reward(void) {
 }
 
 void grid_hab_update(void) {
+  int gridsX = (flipper_states[0]-flipper_loc.info.origin.position.x)/resolution;
+  int gridsY = (flipper_states[1]-flipper_loc.info.origin.position.y)/resolution;
   for (int i = 0; i < totalGrids; i++) {
-    obs_belief_new[i] = flipper_belief[i]*true_obs_belief[i];
-    obs_belief_new[i] += (1-flipper_belief[i])*obs_belief[i];
+    int iGridX = i % width;
+    int iGridY = (int) i/width;
+    if (abs(iGridX-gridsX) < 2 && abs(iGridY-gridsY) < 2) {
+       obs_belief_new[i] = flipper_belief[gridsX+gridsY*width]*true_obs_belief[i];
+       obs_belief_new[i] += (1-flipper_belief[gridsX+gridsY*width])*obs_belief[i];
+    } else {
+      obs_belief_new[i] = flipper_belief[i]*true_obs_belief[i];
+      obs_belief_new[i] += (1-flipper_belief[i])*obs_belief[i];
+    }
   }
   for (int i = 0; i < grid_hab.info.width*grid_hab.info.height; i++) {
     int data = 100*obs_belief_new[i];
@@ -125,12 +134,21 @@ void grid_hab_update(void) {
 }
 
 void grid_sam_update(void) {
+  int gridsX = (uav_states[0]-uav_loc.info.origin.position.x)/resolution;
+  int gridsY = (uav_states[1]-uav_loc.info.origin.position.y)/resolution;
   for (int i = 0; i < totalGrids; i++) {
-    sam_belief_new[i] = uav_belief[i]*true_sam_belief[i];
-    sam_belief_new[i] += (1-uav_belief[i])*sam_belief[i];
+    int iGridX = i % width;
+    int iGridY = (int) i/width;
+    if (abs(iGridX-gridsX) < 2 && abs(iGridY-gridsY) < 2) {
+       sam_belief_new[i] = uav_belief[gridsX+gridsY*width]*true_sam_belief[i];
+       sam_belief_new[i] += (1-uav_belief[gridsX+gridsY*width])*sam_belief[i];
+    } else {
+      sam_belief_new[i] = uav_belief[i]*true_sam_belief[i];
+      sam_belief_new[i] += (1-uav_belief[i])*sam_belief[i];
+    }
   }
   for (int i = 0; i < grid_sam.info.width*grid_sam.info.height; i++) {
-    int data = 100*obs_belief_new[i];
+    int data = 100*sam_belief_new[i];
     grid_sam.data[i] = data;
     sam_belief[i] =  sam_belief_new[i];
   }
@@ -231,43 +249,43 @@ void uav_complete_cb(const std_msgs::Bool::ConstPtr& msg) {
           gridDesY = iGridY-1;
         }
         if ((int) gridDesX-1 > -1 && gridDesX > -1 && gridDesY > -1) {
-          uav_belief_new[(gridDesX-1)+gridDesY*uav_loc.info.width] += (double) uav_belief[iGridX+iGridY*uav_loc.info.width]*.02;
+          uav_belief_new[(gridDesX-1)+gridDesY*uav_loc.info.width] += (double) uav_belief[iGridX+iGridY*uav_loc.info.width]*.01;
           count++;
         }
         if ((int) gridDesX-1 > -1 && (int) gridDesY-1 > -1 && gridDesX > -1 && gridDesY > -1) {
-          uav_belief_new[(gridDesX-1)+(gridDesY-1)*uav_loc.info.width] += (double) uav_belief[iGridX+iGridY*uav_loc.info.width]*.02;
+          uav_belief_new[(gridDesX-1)+(gridDesY-1)*uav_loc.info.width] += (double) uav_belief[iGridX+iGridY*uav_loc.info.width]*.01;
           count++;
         }
         if ((int) gridDesY-1 > -1 && gridDesX > -1 && gridDesY > -1) {
-          uav_belief_new[(gridDesX)+(gridDesY-1)*uav_loc.info.width] += (double) uav_belief[iGridX+iGridY*uav_loc.info.width]*.02;
+          uav_belief_new[(gridDesX)+(gridDesY-1)*uav_loc.info.width] += (double) uav_belief[iGridX+iGridY*uav_loc.info.width]*.01;
           count++;
         }
         if (gridDesY+1 < height && gridDesX > -1 && gridDesY > -1) {
-          uav_belief_new[(gridDesX)+(gridDesY+1)*uav_loc.info.width] += (double) uav_belief[iGridX+iGridY*uav_loc.info.width]*.02;
+          uav_belief_new[(gridDesX)+(gridDesY+1)*uav_loc.info.width] += (double) uav_belief[iGridX+iGridY*uav_loc.info.width]*.01;
           count++;
         }
         if (gridDesY+1 < height && gridDesX+1 < width && gridDesX > -1 && gridDesY > -1) {
-          uav_belief_new[(gridDesX+1)+(gridDesY+1)*uav_loc.info.width] += (double) uav_belief[iGridX+iGridY*uav_loc.info.width]*.02;
+          uav_belief_new[(gridDesX+1)+(gridDesY+1)*uav_loc.info.width] += (double) uav_belief[iGridX+iGridY*uav_loc.info.width]*.01;
           count++;
         }
         if (gridDesX+1 < width && gridDesX > -1 && gridDesY > -1) {
-          uav_belief_new[(gridDesX+1)+(gridDesY)*uav_loc.info.width] += (double) uav_belief[iGridX+iGridY*uav_loc.info.width]*.02;
+          uav_belief_new[(gridDesX+1)+(gridDesY)*uav_loc.info.width] += (double) uav_belief[iGridX+iGridY*uav_loc.info.width]*.01;
           count++;
         }
         if (gridDesY+1 < height && (int) gridDesX-1 > -1 && gridDesX > -1 && gridDesY > -1) {
-          uav_belief_new[(gridDesX-1)+(gridDesY+1)*uav_loc.info.width] += (double) uav_belief[iGridX+iGridY*uav_loc.info.width]*.02;
+          uav_belief_new[(gridDesX-1)+(gridDesY+1)*uav_loc.info.width] += (double) uav_belief[iGridX+iGridY*uav_loc.info.width]*.01;
           count++;
         }
         if ((int) gridDesY-1 > -1 && gridDesX+1 < width && gridDesX > -1 && gridDesY > -1) {
-          uav_belief_new[(gridDesX+1)+(gridDesY-1)*uav_loc.info.width] += (double) uav_belief[iGridX+iGridY*uav_loc.info.width]*.02;
+          uav_belief_new[(gridDesX+1)+(gridDesY-1)*uav_loc.info.width] += (double) uav_belief[iGridX+iGridY*uav_loc.info.width]*.01;
           count++;
         }
-        double test = (double) uav_belief[iGridX+iGridY*uav_loc.info.width]*(1-.02*count);
+        double test = (double) uav_belief[iGridX+iGridY*uav_loc.info.width]*(1-.01*count);
         double test2 = (double) uav_belief[i];
         if (gridDesX > -1 && gridDesY > -1) {
-        uav_belief_new[gridDesX+gridDesY*uav_loc.info.width] += (double) uav_belief[iGridX+iGridY*uav_loc.info.width]*(1-.02*count);
+        uav_belief_new[gridDesX+gridDesY*uav_loc.info.width] += (double) uav_belief[iGridX+iGridY*uav_loc.info.width]*(1-.01*count);
         } else {
-          uav_belief_new[iGridX+iGridY*uav_loc.info.width] += (double) uav_belief[iGridX+iGridY*uav_loc.info.width]*(1-.02*count);
+          uav_belief_new[iGridX+iGridY*uav_loc.info.width] += (double) uav_belief[iGridX+iGridY*uav_loc.info.width]*(1-.01*count);
         }
       }
 
@@ -286,112 +304,227 @@ void uav_complete_cb(const std_msgs::Bool::ConstPtr& msg) {
 }
 
 void segway_complete_cb(const std_msgs::Bool::ConstPtr& msg) {
-  if (segway_action_finished == true && msg->data == false) {
-    segway_action_finished = false;
-  }
-  if (segway_action_finished == false && msg->data == true) {
-    ros::Time begin = ros::Time::now();
-    segway_loc.header.stamp = begin;
-    
-    int8_t data[segway_loc.info.width*segway_loc.info.height] = {0};
+  if (segway_first_action) {
     uint32_t gridsX = (segway_states[0]-segway_loc.info.origin.position.x)/resolution;
     uint32_t gridsY = (segway_states[1]-segway_loc.info.origin.position.y)/resolution;
+    segway_belief_new[gridsX+gridsY*segway_loc.info.width]= 1;
+    segway_first_action = false;
     for (int i = 0; i < segway_loc.info.width*segway_loc.info.height; i++) {
-      segway_loc.data[i] = 0;
+      segway_loc.data[i] = (int) segway_belief_new[i]*100;
+      segway_belief[i] = (int) segway_belief_new[i];
     }
-    uint32_t count = 0;
-    ROS_INFO("%i %i %i %i", gridsX, gridsY, width, height);
-    if ((int) gridsX-1 > -1) {
-       segway_loc.data[(gridsX-1)+gridsY*segway_loc.info.width] = 2;
-       count++;
-    }
-    if ((int) gridsX-1 > -1 && (int) gridsY-1 > -1) {
-       segway_loc.data[(gridsX-1)+(gridsY-1)*segway_loc.info.width] = 2;
-       count++;
-    }
-    if ((int) gridsY-1 > -1) {
-       segway_loc.data[(gridsX)+(gridsY-1)*segway_loc.info.width] = 2;
-       count++;
-    }
-    if (gridsY+1 < height) {
-       segway_loc.data[(gridsX)+(gridsY+1)*segway_loc.info.width] = 2;
-       count++;
-    }
-    if (gridsY+1 < height && gridsX+1 < width) {
-       segway_loc.data[(gridsX+1)+(gridsY+1)*segway_loc.info.width] = 2;
-       count++;
-    }
-    if (gridsX+1 < width) {
-       segway_loc.data[(gridsX+1)+(gridsY)*segway_loc.info.width] = 2;
-       count++;
-    }
-    if (gridsY+1 < height && (int) gridsX-1 > -1) {
-       segway_loc.data[(gridsX-1)+(gridsY+1)*segway_loc.info.width] = 2;
-       count++;
-    }
-    if ((int) gridsY-1 > -1 && gridsX+1 < width) {
-       segway_loc.data[(gridsX+1)+(gridsY-1)*segway_loc.info.width] = 2;
-       count++;
-    }
-
-    segway_loc.data[gridsX+gridsY*segway_loc.info.width] = 100-2*count;
     segway_grid_pub.publish(segway_loc);
-    segway_action_finished = true;
+  } else {
+    if (segway_action_finished == true && msg->data == false) {
+      segway_action_finished = false;
+    }
+    if (segway_action_finished == false && msg->data == true) {
+      segway_belief_new.setZero();
+      ros::Time begin = ros::Time::now();
+      segway_loc.header.stamp = begin;
+      // prior states
+      uint32_t gridsX_old = (segway_states_old[0]-segway_loc.info.origin.position.x)/resolution;
+      uint32_t gridsY_old = (segway_states_old[1]-segway_loc.info.origin.position.y)/resolution;
+      //observations
+      uint32_t gridsX = (segway_states[0]-segway_loc.info.origin.position.x)/resolution;
+      uint32_t gridsY = (segway_states[1]-segway_loc.info.origin.position.y)/resolution;
+      int gridDesX = 0;
+      int gridDesY = 0;
+      for (int i = 0; i < totalGrids; i ++) {
+        int iGridX = i % width;
+        int iGridY = (int) i/width;
+        uint32_t count = 0;
+
+        if (segway_action == 0 ) {
+          if (iGridX == gridsX_old && iGridY == gridsY_old) {
+            segway_belief_new[i] = segway_belief[i];
+            continue;
+          }
+        }
+        if (segway_action == 1 ) {
+          gridDesX = iGridX+1;
+          gridDesY = iGridY;
+        }
+        if (segway_action == 2 ) {
+          gridDesX = iGridX;
+          gridDesY = iGridY+1;
+        }
+        if (segway_action == 3 ) {
+          gridDesX = iGridX-1;
+          gridDesY = iGridY;
+        }
+        if (segway_action == 4 ) {
+          gridDesX = iGridX;
+          gridDesY = iGridY-1;
+        }
+        if ((int) gridDesX-1 > -1 && gridDesX > -1 && gridDesY > -1) {
+          segway_belief_new[(gridDesX-1)+gridDesY*segway_loc.info.width] += (double) segway_belief[iGridX+iGridY*segway_loc.info.width]*.01;
+          count++;
+        }
+        if ((int) gridDesX-1 > -1 && (int) gridDesY-1 > -1 && gridDesX > -1 && gridDesY > -1) {
+          segway_belief_new[(gridDesX-1)+(gridDesY-1)*segway_loc.info.width] += (double) segway_belief[iGridX+iGridY*segway_loc.info.width]*.01;
+          count++;
+        }
+        if ((int) gridDesY-1 > -1 && gridDesX > -1 && gridDesY > -1) {
+          segway_belief_new[(gridDesX)+(gridDesY-1)*segway_loc.info.width] += (double) segway_belief[iGridX+iGridY*segway_loc.info.width]*.01;
+          count++;
+        }
+        if (gridDesY+1 < height && gridDesX > -1 && gridDesY > -1) {
+          segway_belief_new[(gridDesX)+(gridDesY+1)*segway_loc.info.width] += (double) segway_belief[iGridX+iGridY*segway_loc.info.width]*.01;
+          count++;
+        }
+        if (gridDesY+1 < height && gridDesX+1 < width && gridDesX > -1 && gridDesY > -1) {
+          segway_belief_new[(gridDesX+1)+(gridDesY+1)*segway_loc.info.width] += (double) segway_belief[iGridX+iGridY*segway_loc.info.width]*.01;
+          count++;
+        }
+        if (gridDesX+1 < width && gridDesX > -1 && gridDesY > -1) {
+          segway_belief_new[(gridDesX+1)+(gridDesY)*segway_loc.info.width] += (double) segway_belief[iGridX+iGridY*segway_loc.info.width]*.01;
+          count++;
+        }
+        if (gridDesY+1 < height && (int) gridDesX-1 > -1 && gridDesX > -1 && gridDesY > -1) {
+          segway_belief_new[(gridDesX-1)+(gridDesY+1)*segway_loc.info.width] += (double) segway_belief[iGridX+iGridY*segway_loc.info.width]*.01;
+          count++;
+        }
+        if ((int) gridDesY-1 > -1 && gridDesX+1 < width && gridDesX > -1 && gridDesY > -1) {
+          segway_belief_new[(gridDesX+1)+(gridDesY-1)*segway_loc.info.width] += (double) segway_belief[iGridX+iGridY*segway_loc.info.width]*.01;
+          count++;
+        }
+        double test = (double) segway_belief[iGridX+iGridY*segway_loc.info.width]*(1-.01*count);
+        double test2 = (double) segway_belief[i];
+        if (gridDesX > -1 && gridDesY > -1) {
+        segway_belief_new[gridDesX+gridDesY*segway_loc.info.width] += (double) segway_belief[iGridX+iGridY*segway_loc.info.width]*(1-.01*count);
+        } else {
+          segway_belief_new[iGridX+iGridY*segway_loc.info.width] += (double) segway_belief[iGridX+iGridY*segway_loc.info.width]*(1-.01*count);
+        }
+      }
+
+      for (int i = 0; i < segway_loc.info.width*segway_loc.info.height; i++) {
+        int data = 100*segway_belief_new[i];
+        segway_loc.data[i] = data;
+        segway_belief[i] =  segway_belief_new[i];
+      }
+      segway_grid_pub.publish(segway_loc);
+      segway_action_finished = true;
+      grid_hab_update();
+      grid_sam_update();
+      double maxVal = 0;
+      for (int i = 0; i < totalGrids; i++) {
+        double val = segway_belief[i] * obs_belief[i];
+        if (val > maxVal) {
+          maxVal += val;
+        }
+      }
+      ROS_INFO("SAFETY VIOLATION: %f",maxVal);
+    }
   }
 }
 
 void flipper_complete_cb(const std_msgs::Bool::ConstPtr& msg) {
-  if (flipper_action_finished == true && msg->data == false) {
-    flipper_action_finished = false;
-  }
-  if (flipper_action_finished == false && msg->data == true) {
-    ros::Time begin = ros::Time::now();
-    flipper_loc.header.stamp = begin;
-    
-    int8_t data[flipper_loc.info.width*flipper_loc.info.height] = {0};
+  if (flipper_first_action) {
     uint32_t gridsX = (flipper_states[0]-flipper_loc.info.origin.position.x)/resolution;
     uint32_t gridsY = (flipper_states[1]-flipper_loc.info.origin.position.y)/resolution;
+    flipper_belief_new[gridsX+gridsY*flipper_loc.info.width]= 1;
+    flipper_first_action = false;
     for (int i = 0; i < flipper_loc.info.width*flipper_loc.info.height; i++) {
-      flipper_loc.data[i] = 0;
+      flipper_loc.data[i] = (int) flipper_belief_new[i]*100;
+      flipper_belief[i] = (int) flipper_belief_new[i];
     }
-    uint32_t count = 0;
-    ROS_INFO("%i %i %i %i", gridsX, gridsY, width, height);
-    if ((int) gridsX-1 > -1) {
-       flipper_loc.data[(gridsX-1)+gridsY*flipper_loc.info.width] = 2;
-       count++;
-    }
-    if ((int) gridsX-1 > -1 && (int) gridsY-1 > -1) {
-       flipper_loc.data[(gridsX-1)+(gridsY-1)*flipper_loc.info.width] = 2;
-       count++;
-    }
-    if ((int) gridsY-1 > -1) {
-       flipper_loc.data[(gridsX)+(gridsY-1)*flipper_loc.info.width] = 2;
-       count++;
-    }
-    if (gridsY+1 < height) {
-       flipper_loc.data[(gridsX)+(gridsY+1)*flipper_loc.info.width] = 2;
-       count++;
-    }
-    if (gridsY+1 < height && gridsX+1 < width) {
-       flipper_loc.data[(gridsX+1)+(gridsY+1)*flipper_loc.info.width] = 2;
-       count++;
-    }
-    if (gridsX+1 < width) {
-       flipper_loc.data[(gridsX+1)+(gridsY)*flipper_loc.info.width] = 2;
-       count++;
-    }
-    if (gridsY+1 < height && (int) gridsX-1 > -1) {
-       flipper_loc.data[(gridsX-1)+(gridsY+1)*flipper_loc.info.width] = 2;
-       count++;
-    }
-    if ((int) gridsY-1 > -1 && gridsX+1 < width) {
-       flipper_loc.data[(gridsX+1)+(gridsY-1)*flipper_loc.info.width] = 2;
-       count++;
-    }
-
-    flipper_loc.data[gridsX+gridsY*flipper_loc.info.width] = 100-2*count;
     flipper_grid_pub.publish(flipper_loc);
-    flipper_action_finished = true;
+  } else {
+    if (flipper_action_finished == true && msg->data == false) {
+      flipper_action_finished = false;
+    }
+    if (flipper_action_finished == false && msg->data == true) {
+      flipper_belief_new.setZero();
+      ros::Time begin = ros::Time::now();
+      flipper_loc.header.stamp = begin;
+      // prior states
+      uint32_t gridsX_old = (flipper_states_old[0]-flipper_loc.info.origin.position.x)/resolution;
+      uint32_t gridsY_old = (flipper_states_old[1]-flipper_loc.info.origin.position.y)/resolution;
+      //observations
+      uint32_t gridsX = (flipper_states[0]-flipper_loc.info.origin.position.x)/resolution;
+      uint32_t gridsY = (flipper_states[1]-flipper_loc.info.origin.position.y)/resolution;
+      int gridDesX = 0;
+      int gridDesY = 0;
+      for (int i = 0; i < totalGrids; i ++) {
+        int iGridX = i % width;
+        int iGridY = (int) i/width;
+        uint32_t count = 0;
+
+        if (flipper_action == 0 ) {
+          if (iGridX == gridsX_old && iGridY == gridsY_old) {
+            flipper_belief_new[i] = flipper_belief[i];
+            continue;
+          }
+        }
+        if (flipper_action == 1 ) {
+          gridDesX = iGridX+1;
+          gridDesY = iGridY;
+        }
+        if (flipper_action == 2 ) {
+          gridDesX = iGridX;
+          gridDesY = iGridY+1;
+        }
+        if (flipper_action == 3 ) {
+          gridDesX = iGridX-1;
+          gridDesY = iGridY;
+        }
+        if (flipper_action == 4 ) {
+          gridDesX = iGridX;
+          gridDesY = iGridY-1;
+        }
+        if ((int) gridDesX-1 > -1 && gridDesX > -1 && gridDesY > -1) {
+          flipper_belief_new[(gridDesX-1)+gridDesY*flipper_loc.info.width] += (double) flipper_belief[iGridX+iGridY*flipper_loc.info.width]*.01;
+          count++;
+        }
+        if ((int) gridDesX-1 > -1 && (int) gridDesY-1 > -1 && gridDesX > -1 && gridDesY > -1) {
+          flipper_belief_new[(gridDesX-1)+(gridDesY-1)*flipper_loc.info.width] += (double) flipper_belief[iGridX+iGridY*flipper_loc.info.width]*.01;
+          count++;
+        }
+        if ((int) gridDesY-1 > -1 && gridDesX > -1 && gridDesY > -1) {
+          flipper_belief_new[(gridDesX)+(gridDesY-1)*flipper_loc.info.width] += (double) flipper_belief[iGridX+iGridY*flipper_loc.info.width]*.01;
+          count++;
+        }
+        if (gridDesY+1 < height && gridDesX > -1 && gridDesY > -1) {
+          flipper_belief_new[(gridDesX)+(gridDesY+1)*flipper_loc.info.width] += (double) flipper_belief[iGridX+iGridY*flipper_loc.info.width]*.01;
+          count++;
+        }
+        if (gridDesY+1 < height && gridDesX+1 < width && gridDesX > -1 && gridDesY > -1) {
+          flipper_belief_new[(gridDesX+1)+(gridDesY+1)*flipper_loc.info.width] += (double) flipper_belief[iGridX+iGridY*flipper_loc.info.width]*.01;
+          count++;
+        }
+        if (gridDesX+1 < width && gridDesX > -1 && gridDesY > -1) {
+          flipper_belief_new[(gridDesX+1)+(gridDesY)*flipper_loc.info.width] += (double) flipper_belief[iGridX+iGridY*flipper_loc.info.width]*.01;
+          count++;
+        }
+        if (gridDesY+1 < height && (int) gridDesX-1 > -1 && gridDesX > -1 && gridDesY > -1) {
+          flipper_belief_new[(gridDesX-1)+(gridDesY+1)*flipper_loc.info.width] += (double) flipper_belief[iGridX+iGridY*flipper_loc.info.width]*.01;
+          count++;
+        }
+        if ((int) gridDesY-1 > -1 && gridDesX+1 < width && gridDesX > -1 && gridDesY > -1) {
+          flipper_belief_new[(gridDesX+1)+(gridDesY-1)*flipper_loc.info.width] += (double) flipper_belief[iGridX+iGridY*flipper_loc.info.width]*.01;
+          count++;
+        }
+        double test = (double) flipper_belief[iGridX+iGridY*flipper_loc.info.width]*(1-.01*count);
+        double test2 = (double) flipper_belief[i];
+        if (gridDesX > -1 && gridDesY > -1) {
+        flipper_belief_new[gridDesX+gridDesY*flipper_loc.info.width] += (double) flipper_belief[iGridX+iGridY*flipper_loc.info.width]*(1-.01*count);
+        } else {
+          flipper_belief_new[iGridX+iGridY*flipper_loc.info.width] += (double) flipper_belief[iGridX+iGridY*flipper_loc.info.width]*(1-.01*count);
+        }
+      }
+
+      for (int i = 0; i < flipper_loc.info.width*flipper_loc.info.height; i++) {
+        int data = 100*flipper_belief_new[i];
+        flipper_loc.data[i] = data;
+        flipper_belief[i] =  flipper_belief_new[i];
+      }
+      flipper_grid_pub.publish(flipper_loc);
+      flipper_action_finished = true;
+      grid_hab_update();
+      grid_sam_update();
+      ROS_INFO("sum: %f",flipper_belief.sum());
+    }
   }
 }
 
@@ -471,9 +604,10 @@ int main(int argc, char **argv) {
   grid_sam.data.resize(grid_sam.info.width*grid_sam.info.height,-1);
 
   // Define grids with obstacles
-  true_obs_belief(9*3+4) = 1;
-  true_obs_belief(9*5+3) = 1;
-  true_sam_belief(9*8+0) = 1;
+  true_obs_belief(9*4+5) = 1;
+  true_obs_belief(9*5+2) = 1;
+  true_obs_belief(9*6+4) = 1;
+  true_sam_belief(9*7+0) = 1;
   obs_belief = obs_belief*.5;
   sam_belief = sam_belief*.5;
 

@@ -3,9 +3,9 @@
 
   <link name="flipper/base_link">
     <visual>
-      <origin rpy="1.5707960 0 -1.5707960" xyz="0 0 0"/>
+      <origin rpy="1.5707960 0 0" xyz="0 0 .1"/>
       <geometry>
-        <mesh filename="package://pomdp_ros/Gazebo/Meshes/Flipper/T-90.stl" scale="0.002 0.002 0.002"/>
+        <mesh filename="package://pomdp_ros/Gazebo/Meshes/Flipper/Dual.stl" scale="0.01 0.01 0.01"/>
       </geometry>
     </visual>
     <inertial>
