@@ -45,61 +45,63 @@ state_type segway_states = Eigen::VectorXd::Zero(segway_nx);
 state_type flipper_states = Eigen::VectorXd::Zero(flipper_nx);
 
 void joy_cb(const sensor_msgs::Joy & msg) {
-  if (msg.buttons[0] == 1) {
+  int rate = 1;
+  ros::Rate r(rate);
+  if (msg.buttons[3] == 1) {
     uav_selected = true;
     segway_selected = false;
     flipper_selected = false;
   }
-  if (msg.buttons[1] == 1) {
+  if (msg.buttons[2] == 1) {
     uav_selected = false;
     segway_selected = true;
     flipper_selected = false;
   }
-  if (msg.buttons[2] == 1) {
+  if (msg.buttons[1] == 1) {
     uav_selected = false;
     segway_selected = false;
     flipper_selected = true;
   }
-  if (uav_selected && msg.buttons[3] == 1) {
+  if (uav_selected && msg.axes[6] == 1) {
     uav_action = 1;
   }
-  if (uav_selected && msg.buttons[4] == 1) {
+  if (uav_selected && msg.axes[7] == -1) {
     uav_action = 2;
   }
-  if (uav_selected && msg.buttons[5] == 1) {
+  if (uav_selected && msg.axes[6] == -1) {
     uav_action = 3;
   }
-  if (uav_selected && msg.buttons[6] == 1) {
+  if (uav_selected && msg.axes[7] == 1) {
     uav_action = 4;
   }
 
-  if (segway_selected && msg.buttons[3] == 1) {
+  if (segway_selected && msg.axes[6] == 1) {
     segway_action = 1;
   }
-  if (segway_selected && msg.buttons[4] == 1) {
+  if (segway_selected && msg.axes[7] == -1) {
     segway_action = 2;
   }
-  if (segway_selected && msg.buttons[5] == 1) {
+  if (segway_selected && msg.axes[6] == -1) {
     segway_action = 3;
   }
-  if (segway_selected && msg.buttons[6] == 1) {
+  if (segway_selected && msg.axes[7] == 1) {
     segway_action = 4;
   }
 
-  if (flipper_selected && msg.buttons[3] == 1) {
+  if (flipper_selected && msg.axes[6] == 1) {
     flipper_action = 1;
   }
-  if (flipper_selected && msg.buttons[4] == 1) {
+  if (flipper_selected && msg.axes[7] == -1) {
     flipper_action = 2;
   }
-  if (flipper_selected && msg.buttons[5] == 1) {
+  if (flipper_selected && msg.axes[6] == -1) {
     flipper_action = 3;
   }
-  if (flipper_selected && msg.buttons[6] == 1) {
+  if (flipper_selected && msg.axes[7] == 1) {
     flipper_action = 4;
   }
 
-  if (msg.buttons[7] == 1) {
+  if (msg.buttons[0] == 1) {
     uav_selected = false;
     segway_selected = false;
     flipper_selected = false;
@@ -119,6 +121,7 @@ void joy_cb(const sensor_msgs::Joy & msg) {
     int uav_action = 0;
     int flipper_action = 0;
     int segway_action = 0;
+    r.sleep();
   }
 }
 

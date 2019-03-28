@@ -31,6 +31,11 @@
   <arg unless="$(arg debug)" name="script_type" value="gzserver"/>
   <arg     if="$(arg debug)" name="script_type" value="debug"/>
 
+  <node pkg="joy" type="joy_node" name="joy_node">
+    <param name="dev" value="/dev/input/js0" />
+    <param name="autorepeat_rate" value="50.0" />
+  </node>
+
   <!-- start gazebo server-->
   <group if="$(arg use_clock_frequency)">
     <param name="gazebo/pub_clock_frequency" value="$(arg pub_clock_frequency)" />
@@ -52,12 +57,16 @@
   <node pkg="pomdp_ros" type="controller" name="controller" output="screen">
   </node>
 
+  <!-- start gazebo interface -->
+  <node pkg="pomdp_ros" type="gazebo_interface" name="gazebo_interface" output="screen">
+  </node>
+
   <!-- start grid_states -->
   <node pkg="pomdp_ros" type="grid_states" name="grid_states" output="screen">
   </node>
 
-  <!-- start gazebo interface -->
-  <node pkg="pomdp_ros" type="gazebo_interface" name="gazebo_interface" output="screen">
+  <!-- start action_commander -->
+  <node pkg="pomdp_ros" type="action_commander" name="action_commander" output="screen">
   </node>
 
 </launch>
