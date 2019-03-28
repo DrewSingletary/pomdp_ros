@@ -58,6 +58,7 @@ bool flipper_action_finished = true;
 
 int uav_action = 0;
 int segway_action = 0;
+int segway_action_real = 0;
 int flipper_action = 0;
 
 bool uav_first_action = true;
@@ -84,6 +85,98 @@ ros::Publisher segway_grid_pub;
 ros::Publisher flipper_grid_pub;
 ros::Publisher grid_hab_pub;
 ros::Publisher grid_sam_pub;
+ros::Publisher segway_action_pub;
+
+double segway_filter(void) {
+  uint32_t gridsX_old = (segway_states_old[0]-segway_loc.info.origin.position.x)/resolution;
+  uint32_t gridsY_old = (segway_states_old[1]-segway_loc.info.origin.position.y)/resolution;
+  //observations
+  uint32_t gridsX = (segway_states[0]-segway_loc.info.origin.position.x)/resolution;
+  uint32_t gridsY = (segway_states[1]-segway_loc.info.origin.position.y)/resolution;
+  int gridDesX = 0;
+  int gridDesY = 0;
+  for (int i = 0; i < totalGrids; i ++) {
+    int iGridX = i % width;
+    int iGridY = (int) i/width;
+    uint32_t count = 0;
+
+    if (segway_action == 0 ) {
+      segway_action_real = 0;
+      return 0.0F;
+    }
+    if (segway_action == 1 ) {
+      gridDesX = iGridX+1;
+      gridDesY = iGridY;
+    }
+    if (segway_action == 2 ) {
+      gridDesX = iGridX;
+      gridDesY = iGridY+1;
+    }
+    if (segway_action == 3 ) {
+      gridDesX = iGridX-1;
+      gridDesY = iGridY;
+    }
+    if (segway_action == 4 ) {
+      gridDesX = iGridX;
+      gridDesY = iGridY-1;
+    }
+    if ((int) gridDesX-1 > -1 && gridDesX > -1 && gridDesY > -1) {
+      segway_belief_new[(gridDesX-1)+gridDesY*segway_loc.info.width] += (double) segway_belief[iGridX+iGridY*segway_loc.info.width]*.01;
+      count++;
+    }
+    if ((int) gridDesX-1 > -1 && (int) gridDesY-1 > -1 && gridDesX > -1 && gridDesY > -1) {
+      segway_belief_new[(gridDesX-1)+(gridDesY-1)*segway_loc.info.width] += (double) segway_belief[iGridX+iGridY*segway_loc.info.width]*.01;
+      count++;
+    }
+    if ((int) gridDesY-1 > -1 && gridDesX > -1 && gridDesY > -1) {
+      segway_belief_new[(gridDesX)+(gridDesY-1)*segway_loc.info.width] += (double) segway_belief[iGridX+iGridY*segway_loc.info.width]*.01;
+      count++;
+    }
+    if (gridDesY+1 < height && gridDesX > -1 && gridDesY > -1) {
+      segway_belief_new[(gridDesX)+(gridDesY+1)*segway_loc.info.width] += (double) segway_belief[iGridX+iGridY*segway_loc.info.width]*.01;
+      count++;
+    }
+    if (gridDesY+1 < height && gridDesX+1 < width && gridDesX > -1 && gridDesY > -1) {
+      segway_belief_new[(gridDesX+1)+(gridDesY+1)*segway_loc.info.width] += (double) segway_belief[iGridX+iGridY*segway_loc.info.width]*.01;
+      count++;
+    }
+    if (gridDesX+1 < width && gridDesX > -1 && gridDesY > -1) {
+      segway_belief_new[(gridDesX+1)+(gridDesY)*segway_loc.info.width] += (double) segway_belief[iGridX+iGridY*segway_loc.info.width]*.01;
+      count++;
+    }
+    if (gridDesY+1 < height && (int) gridDesX-1 > -1 && gridDesX > -1 && gridDesY > -1) {
+      segway_belief_new[(gridDesX-1)+(gridDesY+1)*segway_loc.info.width] += (double) segway_belief[iGridX+iGridY*segway_loc.info.width]*.01;
+      count++;
+    }
+    if ((int) gridDesY-1 > -1 && gridDesX+1 < width && gridDesX > -1 && gridDesY > -1) {
+      segway_belief_new[(gridDesX+1)+(gridDesY-1)*segway_loc.info.width] += (double) segway_belief[iGridX+iGridY*segway_loc.info.width]*.01;
+      count++;
+    }
+    double test = (double) segway_belief[iGridX+iGridY*segway_loc.info.width]*(1-.01*count);
+    double test2 = (double) segway_belief[i];
+    if (gridDesX > -1 && gridDesY > -1) {
+    segway_belief_new[gridDesX+gridDesY*segway_loc.info.width] += (double) segway_belief[iGridX+iGridY*segway_loc.info.width]*(1-.01*count);
+    } else {
+      segway_belief_new[iGridX+iGridY*segway_loc.info.width] += (double) segway_belief[iGridX+iGridY*segway_loc.info.width]*(1-.01*count);
+    }
+  }
+
+  for (int i = 0; i < segway_loc.info.width*segway_loc.info.height; i++) {
+    int data = 100*segway_belief_new[i];
+    segway_loc.data[i] = data;
+    segway_belief[i] =  segway_belief_new[i];
+  }
+  segway_grid_pub.publish(segway_loc);
+  segway_action_finished = true;
+  double maxVal = 0;
+  double maxAllowed = 0.05;
+  for (int i = 0; i < totalGrids; i++) {
+    double val = segway_belief[i] * obs_belief[i];
+    maxVal += val;
+  }
+  return maxVal
+}
+
 
 void uav_reward(void) {
   double uav_r[totalGrids];
@@ -187,7 +280,29 @@ void uav_actions_cb(const std_msgs::Int32::ConstPtr& msg) {
 }
 
 void segway_actions_cb(const std_msgs::Int32::ConstPtr& msg) {
-    segway_action = msg->data;
+  segway_action_real = 0;
+  segway_action = msg->data;
+  double prob_failure = segway_filter();
+  if (prob_failure < 0.05) {
+    segway_action_real = segway_action;
+  }
+  if (prob_failure > 0.05 && segway_action == 2) {
+    segway_action = 3;
+    prob_failure = segway_filter();
+    if (prob_failure > 0.05) {
+      segway_action_real = 0;
+    }
+  }
+  if (prob_failure > 0.05 && segway_action == 3) {
+    segway_action = 2;
+    prob_failure = segway_filter();
+    if (prob_failure > 0.05) {
+      segway_action_real = 0;
+    }
+  }
+  std_msgs::Int32 segway_action_message;
+  segway_action_message.data = segway_action_real;
+  segway_action_pub.publish(segway_action_message);
 }
 
 void flipper_actions_cb(const std_msgs::Int32::ConstPtr& msg) {
@@ -405,16 +520,18 @@ void segway_complete_cb(const std_msgs::Bool::ConstPtr& msg) {
       }
       segway_grid_pub.publish(segway_loc);
       segway_action_finished = true;
-      grid_hab_update();
-      grid_sam_update();
       double maxVal = 0;
+      double maxAllowed = 0.05;
       for (int i = 0; i < totalGrids; i++) {
         double val = segway_belief[i] * obs_belief[i];
-        if (val > maxVal) {
+        // if (val > maxVal) {
           maxVal += val;
-        }
+        // }
       }
-      ROS_INFO("SAFETY VIOLATION: %f",maxVal);
+      if (maxVal > maxAllowed) {
+        ROS_INFO("SAFETY VIOLATION: %f",maxVal);
+
+      }
     }
   }
 }
@@ -543,7 +660,7 @@ int main(int argc, char **argv) {
   ros::Subscriber flipper_states_sub = n.subscribe<std_msgs::Float32MultiArray>("flipper/states", 1,flipper_states_cb);
 
   ros::Subscriber uav_actions_sub = n.subscribe<std_msgs::Int32>("uav/action", 1, uav_actions_cb);
-  ros::Subscriber segway_actions_sub = n.subscribe<std_msgs::Int32>("segway/action", 1, segway_actions_cb);
+  ros::Subscriber segway_actions_sub = n.subscribe<std_msgs::Int32>("segway/action_desired", 1, segway_actions_cb);
   ros::Subscriber flipper_actions_sub = n.subscribe<std_msgs::Int32>("flipper/action", 1,flipper_actions_cb);
 
   ros::Subscriber uav_complete_sub = n.subscribe<std_msgs::Bool>("uav/complete", 1, uav_complete_cb);
@@ -555,6 +672,8 @@ int main(int argc, char **argv) {
   flipper_grid_pub = n.advertise<nav_msgs::OccupancyGrid>("flipper/belief", 1);
   grid_hab_pub = n.advertise<nav_msgs::OccupancyGrid>("grid/habitable", 1);
   grid_sam_pub = n.advertise<nav_msgs::OccupancyGrid>("grid/sample", 1);
+  
+  segway_action_pub = n.advertise<std_msgs::Int32>("segway/action_actual", 1000);
 
   ros::Rate loop_rate(200*timeScale);
 

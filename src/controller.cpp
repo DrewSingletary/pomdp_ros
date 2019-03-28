@@ -322,7 +322,7 @@ int main(int argc, char **argv) {
   ros::Subscriber flipper_states_sub = n.subscribe<std_msgs::Float32MultiArray>("flipper/states", 1,flipper_states_cb);
 
   ros::Subscriber uav_act_sub = n.subscribe<std_msgs::Int32>("uav/action", 1, uav_act_cb);
-  ros::Subscriber segway_act_sub = n.subscribe<std_msgs::Int32>("segway/action", 1, segway_act_cb);
+  ros::Subscriber segway_act_sub = n.subscribe<std_msgs::Int32>("segway/action_actual", 1, segway_act_cb);
   ros::Subscriber flipper_act_sub = n.subscribe<std_msgs::Int32>("flipper/action", 1,flipper_act_cb);
 
   ros::Publisher uav_controller_pub = n.advertise<std_msgs::Float32MultiArray>("uav/inputs", 1000);

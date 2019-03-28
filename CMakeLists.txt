@@ -38,4 +38,5 @@ target_link_libraries(grid_states ${catkin_LIBRARIES})
 add_executable(gazebo_interface src/gazebo_interface.cpp)
 target_link_libraries(gazebo_interface ${catkin_LIBRARIES})
 
-
+add_executable(action_commander src/action_commander.cpp)
+target_link_libraries(action_commander ${catkin_LIBRARIES})
