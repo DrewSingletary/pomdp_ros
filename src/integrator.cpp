@@ -4,11 +4,10 @@
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
 #include <boost/numeric/odeint.hpp>
-#include <boost/numeric/odeint/external/eigen/eigen.hpp>
 #include <stdlib.h>
-#include <math.h> 
+#include <math.h>
 
-typedef Eigen::VectorXd state_type;
+typedef std::vector<double> state_type;
 
 
 double t;
@@ -24,17 +23,19 @@ const int flipper_nu = 2;
 class UAVIntegrator {
 public:
   UAVIntegrator() {
-    x = Eigen::VectorXd::Zero(nx);
-    u = Eigen::VectorXd::Zero(nu);
+    for (int i = 0; i < uav_nx; i++)
+      x.push_back(0.);
+    for (int i = 0; i < uav_nu; i++)
+      u.push_back(0.);
     x[0] = 3.5;
     x[1] = -9.5;
     x[2] = 2;
   }
 
   void callback(const std_msgs::Float32MultiArray::ConstPtr& input) {
-    for (int i = 0; i < nu; i++) {
+    for (int i = 0; i < uav_nu; i++) {
       u[i] = input->data[i];
-    } 
+    }
   }
 
   void rhs(const state_type &x, state_type &dxdt) {
@@ -54,30 +55,30 @@ public:
 
   void integrate(double dt) {
     t = 0.0;
-    boost::numeric::odeint::integrate(boost::bind(&UAVIntegrator::rhs, this, _1, _2), 
+    boost::numeric::odeint::integrate(boost::bind(&UAVIntegrator::rhs, this, _1, _2),
                                       x, t, t+dt, 0.001);
     t += dt;
   }
   state_type x;
   state_type u;
-  const int nx = 12;
-  const int nu = 3;
 };
 
 class SegwayIntegrator {
 public:
   SegwayIntegrator() {
-    x = Eigen::VectorXd::Zero(nx);
-    u = Eigen::VectorXd::Zero(nu);
+    for (int i = 0; i < segway_nx; i++)
+      x.push_back(0.);
+    for (int i = 0; i < segway_nu; i++)
+      u.push_back(0.);
     x[0] = 3.5;
     x[1] = -9.5;
     x[3] = M_PI/2;
   }
 
   void callback(const std_msgs::Float32MultiArray::ConstPtr& input) {
-    for (int i = 0; i < nu; i++) {
+    for (int i = 0; i < segway_nu; i++) {
       u[i] = input->data[i];
-    } 
+    }
   }
 
   void rhs(const state_type &x, state_type &dxdt) {
@@ -93,31 +94,31 @@ public:
 
   void integrate(double dt) {
     t = 0.0;
-    boost::numeric::odeint::integrate(boost::bind(&SegwayIntegrator::rhs, this, _1, _2), 
+    boost::numeric::odeint::integrate(boost::bind(&SegwayIntegrator::rhs, this, _1, _2),
                                       x, t, t+dt, 0.001);
     t += dt;
   }
 
   state_type x;
   state_type u;
-  const int nx = 7;
-  const int nu = 2;
 };
 
 class FlipperIntegrator {
 public:
   FlipperIntegrator() {
-    x = Eigen::VectorXd::Zero(nx);
-    u = Eigen::VectorXd::Zero(nu);
+    for (int i = 0; i < flipper_nx; i++)
+      x.push_back(0.);
+    for (int i = 0; i < flipper_nu; i++)
+      u.push_back(0.);
     x[0] = 2.5;
     x[1] = -9.5;
     x[3] = M_PI/2;
   }
 
   void callback(const std_msgs::Float32MultiArray::ConstPtr& input) {
-    for (int i = 0; i < nu; i++) {
+    for (int i = 0; i < flipper_nu; i++) {
       u[i] = input->data[i];
-    } 
+    }
   }
 
   void rhs(const state_type &x, state_type &dxdt) {
@@ -131,15 +132,13 @@ public:
 
   void integrate(double dt) {
     t = 0.0;
-    boost::numeric::odeint::integrate(boost::bind(&FlipperIntegrator::rhs, this, _1, _2), 
+    boost::numeric::odeint::integrate(boost::bind(&FlipperIntegrator::rhs, this, _1, _2),
                                       x, t, t+dt, 0.001);
     t += dt;
   }
 
   state_type x;
   state_type u;
-  const int nx = 5;
-  const int nu = 2;
 };
 
 int main(int argc, char **argv) {

@@ -1,15 +1,15 @@
 #include "ros/ros.h"
 #include "std_msgs/Float32MultiArray.h"
 #include "std_msgs/Int32.h"
-#include "std_msgs/Bool.h" 
+#include "std_msgs/Bool.h"
 
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
 #include "sensor_msgs/Joy.h"
 #include <boost/numeric/odeint.hpp>
-#include <boost/numeric/odeint/external/eigen/eigen.hpp>
+#include <Eigen/Eigen>
 #include <stdlib.h>
-#include <math.h> 
+#include <math.h>
 
 typedef Eigen::VectorXd state_type;
 
@@ -126,7 +126,7 @@ void uav_act_cb(const std_msgs::Int32::ConstPtr& msg) {
     uav_des_pos[0] = uav_states[0];
     uav_des_pos[1] = uav_states[1]-resolution;
   }
-  
+
 }
 
 void segway_act_cb(const std_msgs::Int32::ConstPtr& msg) {
@@ -363,7 +363,7 @@ int main(int argc, char **argv) {
   while (ros::ok()) {
 
     if (uav_state_received && segway_state_received && flipper_state_received) {
-    
+
     uav_controller();
     for (int i = 0;i<uav_nu;i++) {
       uav_msg.data[i] = uav_inputs[i];

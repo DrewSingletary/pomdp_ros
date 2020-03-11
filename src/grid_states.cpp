@@ -7,10 +7,9 @@
 #include "nav_msgs/OccupancyGrid.h"
 #include <nav_msgs/Odometry.h>
 #include "sensor_msgs/Joy.h"
-#include <boost/numeric/odeint.hpp>
-#include <boost/numeric/odeint/external/eigen/eigen.hpp>
+#include <Eigen/Eigen>
 #include <stdlib.h>
-#include <math.h> 
+#include <math.h>
 
 typedef Eigen::VectorXd state_type;
 
@@ -31,10 +30,10 @@ const int castHeight = 15;
 
 // double obstacle_resolution = 3;
 
-int width = (int) castWidth/resolution; 
+int width = (int) castWidth/resolution;
 int height = (int) castHeight/resolution;
 
-// int obsWidth = (int) castWidth/obstacle_resolution; 
+// int obsWidth = (int) castWidth/obstacle_resolution;
 // int obsHeight = (int) castHeight/obstacle_resolution;
 int totalGrids = width*height;
 
@@ -635,7 +634,7 @@ int main(int argc, char **argv) {
   flipper_grid_pub = n.advertise<nav_msgs::OccupancyGrid>("flipper/belief", 1);
   grid_hab_pub = n.advertise<nav_msgs::OccupancyGrid>("grid/habitable", 1);
   grid_sam_pub = n.advertise<nav_msgs::OccupancyGrid>("grid/sample", 1);
-  
+
   segway_action_pub = n.advertise<std_msgs::Int32>("segway/action_actual", 1000);
 
   ros::Rate loop_rate(200*timeScale);

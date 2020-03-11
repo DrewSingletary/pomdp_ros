@@ -3,8 +3,7 @@
 #include "sensor_msgs/Joy.h"
 #include "std_msgs/Float32MultiArray.h"
 #include "gazebo_msgs/ModelState.h"
-#include <boost/numeric/odeint.hpp>
-#include <boost/numeric/odeint/external/eigen/eigen.hpp>
+#include <Eigen/Eigen>
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
 
