@@ -3,6 +3,8 @@
 #include "std_msgs/Int32.h"
 #include "sensor_msgs/Joy.h"
 
+#include "nav_msgs/OccupancyGrid.h"
+
 #include "pcl_ros/point_cloud.h"
 #include <pcl_ros/filters/voxel_grid.h>
 #include <pcl_ros/filters/crop_box.h>
@@ -10,14 +12,14 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
-#include "std_msgs/Bool.h" 
+#include "std_msgs/Bool.h"
 
 #include <sensor_msgs/PointCloud.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/point_cloud_conversion.h>
 
 #include <stdlib.h>
-#include <math.h> 
+#include <math.h>
 
 typedef Eigen::VectorXd state_type;
 
@@ -33,16 +35,11 @@ bool uav_selected = false;
 bool segway_selected = false;
 bool flipper_selected = false;
 
-const int uav_nx = 12;
-const int uav_nu = 3;
-const int segway_nx = 7;
-const int segway_nu = 2;
-const int flipper_nx = 5;
-const int flipper_nu = 2;
-
-state_type uav_states = Eigen::VectorXd::Zero(uav_nx);
-state_type segway_states = Eigen::VectorXd::Zero(segway_nx);
-state_type flipper_states = Eigen::VectorXd::Zero(flipper_nx);
+nav_msgs::OccupancyGrid uav_belief;
+nav_msgs::OccupancyGrid segway_belief;
+nav_msgs::OccupancyGrid flipper_belief;
+nav_msgs::OccupancyGrid grid_hab;
+nav_msgs::OccupancyGrid grid_sam;
 
 void joy_cb(const sensor_msgs::Joy & msg) {
   int rate = 1;
@@ -125,19 +122,24 @@ void joy_cb(const sensor_msgs::Joy & msg) {
   }
 }
 
-void uav_states_cb(const std_msgs::Float32MultiArray::ConstPtr& msg) {
-  for (int i = 0; i < uav_nx; ++i)
-    uav_states[i] = msg->data[i];
+void uav_belief_cb(const nav_msgs::OccupancyGrid::ConstPtr& msg) {
+  uav_belief = *msg;
 }
 
-void segway_states_cb(const std_msgs::Float32MultiArray::ConstPtr& msg) {
-  for (int i = 0; i < segway_nx; ++i)
-    segway_states[i] = msg->data[i];
+void segway_belief_cb(const nav_msgs::OccupancyGrid::ConstPtr& msg) {
+  segway_belief = *msg;
 }
 
-void flipper_states_cb(const std_msgs::Float32MultiArray::ConstPtr& msg) {
-  for (int i = 0; i < flipper_nx; ++i)
-    flipper_states[i] = msg->data[i];
+void flipper_belief_cb(const nav_msgs::OccupancyGrid::ConstPtr& msg) {
+  flipper_belief = *msg;
+}
+
+void grid_hab_cb(const nav_msgs::OccupancyGrid::ConstPtr& msg) {
+  grid_hab = *msg;
+}
+
+void grid_sam_cb(const nav_msgs::OccupancyGrid::ConstPtr& msg) {
+  grid_sam = *msg;
 }
 
 
@@ -147,9 +149,11 @@ int main(int argc, char **argv) {
 
   ros::NodeHandle n_;
 
-  ros::Subscriber uav_states_sub = n_.subscribe<std_msgs::Float32MultiArray>("uav/states", 1, uav_states_cb);
-  ros::Subscriber segway_states_sub = n_.subscribe<std_msgs::Float32MultiArray>("segway/states", 1, segway_states_cb);
-  ros::Subscriber flipper_states_sub = n_.subscribe<std_msgs::Float32MultiArray>("flipper/states", 1,flipper_states_cb);
+  ros::Subscriber uav_belief_sub = n_.subscribe<nav_msgs::OccupancyGrid>("uav/belief", 1, uav_belief_cb);
+  ros::Subscriber segway_belief_sub = n_.subscribe<nav_msgs::OccupancyGrid>("segway/belief", 1, segway_belief_cb);
+  ros::Subscriber flipper_belief_sub = n_.subscribe<nav_msgs::OccupancyGrid>("flipper/belief", 1,flipper_belief_cb);
+  ros::Subscriber grid_hab_sub = n_.subscribe<nav_msgs::OccupancyGrid>("grid/habitable", 1,grid_hab_cb);
+  ros::Subscriber grid_sam_sub = n_.subscribe<nav_msgs::OccupancyGrid>("grid/sample", 1,grid_sam_cb);
 
   ros::Subscriber joy_sub = n_.subscribe("/joy", 1, joy_cb);
 

@@ -66,10 +66,10 @@
         </link>
       </model>
       <model name='flipper'>
-        <pose frame=''>2.5 -9.5 0.15 1.5708 -0 1.5708</pose>
+        <pose frame=''>1.5 -2.5 0.15 1.5708 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='flipper/base_link'>
-          <pose frame=''>2.5 -9.5 0.15 1.5708 -0 1.5708</pose>
+          <pose frame=''>1.5 -2.5 0.15 1.5708 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -77,10 +77,10 @@
       </model>
       <model name='polyform_a7'>
         <static>1</static>
-        <pose frame=''>-2.5 -4.5 -0.3 0 -0 0</pose>
+        <pose frame=''>-2.5 -2.5 -0.3 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='base_link'>
-          <pose frame=''>-2.5 -4.5 -0.3 0 -0 0</pose>
+          <pose frame=''>-2.5 -2.5 -0.3 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -88,10 +88,10 @@
       </model>
       <model name='polyform_a7_0'>
         <static>1</static>
-        <pose frame=''>-0.5 -3.5 -0.3 0 -0 0</pose>
+       <pose frame=''>-0.5 -2.5 -0.3 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='base_link'>
-          <pose frame=''>-0.5 -3.5 -0.3 0 -0 0</pose>
+           <pose frame=''>-0.5 -2.5 -0.3 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -99,10 +99,10 @@
       </model>
       <model name='polyform_a7_1'>
         <static>1</static>
-        <pose frame=''>0.5 -5.5 -0.3 0 -0 0</pose>
+        <pose frame=''>-2.5 -0.5 -0.3 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='base_link'>
-          <pose frame=''>0.5 -5.5 -0.3 0 -0 0</pose>
+          <pose frame=''>-2.5 -0.5 -0.3 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -110,36 +110,36 @@
       </model>
       <model name='red_totem'>
         <static>1</static>
-        <pose frame=''>-4.5 -2.5 -.5 0 -0 0</pose>
+        <pose frame=''>-4.5 -0.5 0 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='cover'>
-          <pose frame=''>-4.5 -2.5 0 0 -0 0</pose>
+          <pose frame=''>-4.5 -0.5 0 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
         <link name='surmark46104::link'>
-          <pose frame=''>-4.5 -2.5 0 0 -0 0</pose>
+          <pose frame=''>-4.5 -0.5 0 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='segway'>
-        <pose frame=''>3.5 -9.5 0.2 0 -0 1.5708</pose>
+        <pose frame=''>1.5 -3.5 0.2 0 -0 3.14</pose>
         <scale>1 1 1</scale>
         <link name='base_link'>
-          <pose frame=''>3.5 -9.5 0.2 0 -0 1.5708</pose>
+          <pose frame=''>1.5 -3.5 0.2 0 -0 3.14</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='uav'>
-        <pose frame=''>3.5 -9.5 2 0 -0 0</pose>
+        <pose frame=''>1.5 -3.5 2 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='base_link'>
-          <pose frame=''>3.5 -9.5 2 0 -0 0</pose>
+          <pose frame=''>1.5 -3.5 2 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>

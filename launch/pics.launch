@@ -4,7 +4,7 @@
   <arg name="paused" default="false"/>
   <arg name="use_sim_time" default="true"/>
   <arg name="extra_gazebo_args" default=""/>
-  <arg name="gui" default="false"/>
+  <arg name="gui" default="true"/>
   <arg name="recording" default="false"/>
   <!-- Note that 'headless' is currently non-functional.  See gazebo_ros_pkgs issue #491 (-r arg does not disable
        rendering, but instead enables recording). The arg definition has been left here to prevent breaking downstream
@@ -36,40 +36,11 @@
     <param name="gazebo/pub_clock_frequency" value="$(arg pub_clock_frequency)" />
   </group>
   <node name="gazebo" pkg="gazebo_ros" type="$(arg script_type)" respawn="$(arg respawn_gazebo)" output="screen"
-  args="$(arg command_arg1) $(arg command_arg2) $(arg command_arg3) -e $(arg physics) $(arg extra_gazebo_args) $(arg world_name)" />
+	args="$(arg command_arg1) $(arg command_arg2) $(arg command_arg3) -e $(arg physics) $(arg extra_gazebo_args) $(arg world_name)" />
 
   <!-- start gazebo client -->
   <group if="$(arg gui)">
     <node name="gazebo_gui" pkg="gazebo_ros" type="gzclient" respawn="false" output="screen" args="$(arg command_arg3)"/>
   </group>
-
-  <!-- <node pkg="joy" type="joy_node" name="joy_node">
-    <param name="dev" value="/dev/input/js0" />
-    <param name="autorepeat_rate" value="50.0" />
-  </node> -->
-
-  <!-- start integrator -->
-  <node pkg="pomdp_ros" type="integrator" name="int" output="screen">
-  <param name="_timeScale" value="1" />
-  </node>
-
-  <!-- start controller -->
-  <node pkg="pomdp_ros" type="controller" name="controller" output="screen">
-  </node>
-
-  <!-- start gazebo interface -->
-  <node pkg="pomdp_ros" type="gazebo_interface" name="gazebo_interface" output="screen">
-  </node>
-
-  <!-- start grid_states -->
-  <node pkg="pomdp_ros" type="grid_states" name="grid_states" output="screen">
-  </node>
-
-  <!-- start action_commander -->
-  <!-- <node pkg="pomdp_ros" type="action_commander" name="action_commander" output="screen">
-  </node> -->
-
-  <!-- start rviz -->
-  <include file="$(find pomdp_ros)/launch/rviz.launch"/>
 
 </launch>

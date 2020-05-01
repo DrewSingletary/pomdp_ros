@@ -5,9 +5,9 @@
     <visual>
       <origin rpy="0.0 0 -3.1415" xyz="4.075 5.135 -0.02"/>
       <geometry>
-        <mesh filename="package://pomdp_ros/Gazebo/Meshes/cast_simple_2.dae" scale="0.0254 0.0254 0.0254"/>
+        <mesh filename="package://pomdp_ros/Gazebo/Meshes/cast_simple_2.dae" scale="1 1 1"/>
       </geometry>
     </visual>
   </link>
-   
+
 </robot>

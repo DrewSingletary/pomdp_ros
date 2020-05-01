@@ -27,8 +27,8 @@ public:
       x.push_back(0.);
     for (int i = 0; i < uav_nu; i++)
       u.push_back(0.);
-    x[0] = 3.5;
-    x[1] = -9.5;
+    x[0] = 1.5;
+    x[1] = -3.5;
     x[2] = 2;
   }
 
@@ -70,9 +70,9 @@ public:
       x.push_back(0.);
     for (int i = 0; i < segway_nu; i++)
       u.push_back(0.);
-    x[0] = 3.5;
-    x[1] = -9.5;
-    x[3] = M_PI/2;
+    x[0] = 1.5;
+    x[1] = -3.5;
+    x[3] = M_PI;
   }
 
   void callback(const std_msgs::Float32MultiArray::ConstPtr& input) {
@@ -110,9 +110,9 @@ public:
       x.push_back(0.);
     for (int i = 0; i < flipper_nu; i++)
       u.push_back(0.);
-    x[0] = 2.5;
-    x[1] = -9.5;
-    x[3] = M_PI/2;
+    x[0] = 1.5;
+    x[1] = -2.5;
+    x[3] = M_PI;
   }
 
   void callback(const std_msgs::Float32MultiArray::ConstPtr& input) {

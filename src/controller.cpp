@@ -16,7 +16,7 @@ typedef Eigen::VectorXd state_type;
 double timeScale = 1;
 double resolution = 1;
 
-double vmax_flipper = .5;
+double vmax_flipper = 1;
 double vmax_segway = 1;
 double vmax_uav = 1;
 
@@ -109,6 +109,9 @@ void uav_act_cb(const std_msgs::Int32::ConstPtr& msg) {
   if (msg->data == 0) {
     uav_des_pos[0] = uav_states[0];
     uav_des_pos[1] = uav_states[1];
+    std_msgs::Bool comp_msg;
+    comp_msg.data = false;
+    uav_complete_pub.publish(comp_msg);
   }
   if (msg->data == 1) {
     uav_des_pos[0] = uav_states[0]+resolution;
@@ -135,6 +138,9 @@ void segway_act_cb(const std_msgs::Int32::ConstPtr& msg) {
     segway_des_pos[1] = segway_states[1];
     int offset = (int)segway_states[3]/(2*M_PI);
     segway_des_ang = segway_states[3];
+    std_msgs::Bool comp_msg;
+    comp_msg.data = false;
+    segway_complete_pub.publish(comp_msg);
   }
   if (msg->data == 1) {
     segway_des_pos[0] = segway_states[0]+resolution;
@@ -188,6 +194,9 @@ void flipper_act_cb(const std_msgs::Int32::ConstPtr& msg) {
     flipper_des_pos[1] = flipper_states[1];
     int offset = (int)flipper_states[3]/(2*M_PI);
     flipper_des_ang = flipper_states[3];
+    std_msgs::Bool comp_msg;
+    comp_msg.data = false;
+    flipper_complete_pub.publish(comp_msg);
   }
   if (msg->data == 1) {
     flipper_des_pos[0] = flipper_states[0]+resolution;
@@ -304,6 +313,7 @@ void flipper_controller(void) {
     }
   }
   flipper_complete_pub.publish(comp_msg);
+
 }
 
 
@@ -360,10 +370,10 @@ int main(int argc, char **argv) {
 
   ros::Rate loop_rate(200*timeScale);
 
+  ros::Duration(1).sleep();
+
   while (ros::ok()) {
-
     if (uav_state_received && segway_state_received && flipper_state_received) {
-
     uav_controller();
     for (int i = 0;i<uav_nu;i++) {
       uav_msg.data[i] = uav_inputs[i];
